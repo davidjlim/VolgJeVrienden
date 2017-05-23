@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">VolgJeVrienden-App</string>
+    <string name="phoneNumber">Enter your phone number</string>
+    <string name="loginButton">Log in</string>
+</resources>
