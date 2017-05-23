@@ -15,7 +15,7 @@ public class RequestPost extends Controller {
 
     public Result send(){
         JsonNode json = Json.newObject()
-                .put("pid", "31643572881").put("password","abc");
+                .put("pid", "31643572882").put("password","abc");
         assert(ws != null);
         assert(ws.url("http://localhost:9000/insert") != null);
         ws.url("http://localhost:9000/insert").post(json);
