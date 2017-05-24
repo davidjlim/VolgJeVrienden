@@ -10,8 +10,8 @@ import play.mvc.Http.MultipartFormData;
  */
 public class PhotoController extends DatabaseController {
     public Result addPhoto() {
-        MultipartFormData body = request().body().asMultipartFormData();
-        String pid = body.getFile("pid");
+        /*MultipartFormData body = request().body().asMultipartFormData();
+        String pid = body.  .getString("pid");
         String password = body.getFile("password");
 
         if(!checkValidUser(pid, password))
@@ -20,7 +20,7 @@ public class PhotoController extends DatabaseController {
         MultipartFormData.FilePart imageFile = body.getFile("image");
 
         System.out.println(file.getFilename());
-        //System.out.println(file.getFile());//.getAbsoluteFile());
+        //System.out.println(file.getFile());//.getAbsoluteFile());*/
         return ok("");
     }
 }

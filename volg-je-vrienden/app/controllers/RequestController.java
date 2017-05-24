@@ -30,4 +30,6 @@ public class RequestController extends DatabaseController {
 
         return ok("Het ging hopelijk goed! (request)");
     }
+
+
 }
