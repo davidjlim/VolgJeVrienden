@@ -27,11 +27,23 @@ import java.sql.Statement;
  * Created by s1511432 on 17/05/17.
  */
 public class DatabaseController extends Controller {
-    public Result signup() {
-        System.out.println("Here!");
+    public Result signin(){
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+        return ok("Welkom");
+
+    }
+
+    public Result signup() {
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String password = jsonNode.findPath("password").asText();
+
+        if(checkUser(pid))
+            return unauthorized();
         String sql = "INSERT INTO USERS(PID, PASSWORDHASH, IMAGE) VALUES(?, ?, NULL)";
 
         try (Connection conn = connect();
@@ -45,6 +57,30 @@ public class DatabaseController extends Controller {
         }
 
         return ok("Het ging hopelijk goed! (signup)");
+    }
+
+    public Result updateGPS(){
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String password = jsonNode.findPath("password").asText();
+        int gpsLong = jsonNode.findPath("gpsLong").asInt();
+        int gpsLat = jsonNode.findPath("gpsLat").asInt();
+
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+
+        String sql = "UPDATE USERS GPSLONG=?, GPSLAT=? WHERE PID=?";
+        Connection conn = connect();
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, gpsLong);
+            pstmt.setInt(2, gpsLat);
+            pstmt.setString(3, pid);
+            pstmt.executeUpdate();
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ok("Het ging hopelijk goed! (gpsUpdate)");
     }
 
     public Result makeRequest(){
@@ -111,6 +147,25 @@ public class DatabaseController extends Controller {
             e.printStackTrace();
         }
         return connection;
+    }
+
+    protected Boolean checkUser(String pid){
+        String select = "SELECT * FROM USERS WHERE PID = ?";
+
+        try {
+            Connection connection = connect();
+            PreparedStatement pstmt = connection.prepareStatement(select);
+            pstmt.setString(1,pid);
+            ResultSet rs = pstmt.executeQuery();
+            connection.close();
+            if(!rs.next())
+                return false;
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     protected Boolean checkValidUser(String pid, String password){
