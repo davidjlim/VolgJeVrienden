@@ -1,5 +1,6 @@
 package com.dlps.volgjevriendenapplication;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.os.StrictMode;
@@ -30,7 +31,6 @@ import static android.provider.ContactsContract.CommonDataKinds.Website.URL;
 import static java.net.Proxy.Type.HTTP;
 
 public class MainActivity extends AppCompatActivity {
-
     private UserLoginTask mAuthTask = null;
 
     private EditText mPhonenumberView;
@@ -58,6 +58,11 @@ public class MainActivity extends AppCompatActivity {
         //mAuthTask.execute((Void) null);
         mAuthTask.execute();
 
+    }
+
+    public void startMap(){
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
     }
 
     /**
@@ -126,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
             mAuthTask = null;
 
             if (success) {
+                startMap();
                 finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

@@ -6,4 +6,5 @@
     <string name="error_incorrect_password">Incorrect password</string>
     <string name="signup_url">http://10.0.2.2:9000/signup</string>
     <string name="host_url">10.0.2.2:9000</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
