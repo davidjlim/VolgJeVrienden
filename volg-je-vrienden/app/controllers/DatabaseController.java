@@ -33,7 +33,7 @@ public class DatabaseController extends Controller {
         String password = jsonNode.findPath("password").asText();
         if(!checkValidUser(pid, password))
             return unauthorized();
-        return ok("Welkom");
+        return ok();
 
     }
 
@@ -43,7 +43,7 @@ public class DatabaseController extends Controller {
         String password = jsonNode.findPath("password").asText();
 
         if(checkUser(pid))
-            return unauthorized();
+            return badRequest();
         String sql = "INSERT INTO USERS(PID, PASSWORDHASH, IMAGE) VALUES(?, ?, NULL)";
 
         try (Connection conn = connect();
@@ -56,7 +56,7 @@ public class DatabaseController extends Controller {
             e.printStackTrace();
         }
 
-        return ok("Het ging hopelijk goed! (signup)");
+        return ok();
     }
 
     public Result updateGPS(){
