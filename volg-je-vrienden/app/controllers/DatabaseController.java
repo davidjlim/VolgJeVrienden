@@ -93,9 +93,9 @@ public class DatabaseController extends Controller {
             return unauthorized();
 
         ArrayNode result = Json.newArray();
-        String sql = "SELECT U.PID, U.GPSLONG, U.GPSLAT FROM U.USERS, F.ISFRIENDSWITH " +
+        String sql = "SELECT U.PID, U.GPSLONG, U.GPSLAT FROM USERS U, ISFRIENDSWITH F" +
                 "WHERE F.PID1 = U.PID AND F.PID2 = ?" +
-                "UNION SELECT U.PID, U.GPSLONG, U.GPSLAT FROM U.USERS, F.ISFRIENDSWITH " +
+                "UNION SELECT U.PID, U.GPSLONG, U.GPSLAT FROM USERS U, ISFRIENDSWITH F" +
                 "WHERE F.PID2 = U.PID AND F.PID1 = ?";
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
