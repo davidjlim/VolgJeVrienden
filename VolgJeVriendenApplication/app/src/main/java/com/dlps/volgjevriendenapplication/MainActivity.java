@@ -1,5 +1,6 @@
 package com.dlps.volgjevriendenapplication;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Looper;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.apache.http.params.HttpConnectionParams;
 import org.json.JSONException;
@@ -38,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private View mProgressView;
     private View mLoginFormView;
 
+    public static final int HTTP_NO_CONNECTION = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,10 +66,26 @@ public class MainActivity extends AppCompatActivity {
         String phonenumber = mPhonenumberView.getText().toString();
         String password = mPasswordView.getText().toString();
 
-        mAuthTask = new UserLoginTask(phonenumber, password);
+        mAuthTask = new UserLoginTask(phonenumber, password, true);
         //mAuthTask.execute((Void) null);
         mAuthTask.execute();
+    }
 
+    public void signup(View view){
+        if (mAuthTask != null) {
+            return;
+        }
+
+        // Reset errors.
+        mPhonenumberView.setError(null);
+        mPasswordView.setError(null);
+
+        String phonenumber = mPhonenumberView.getText().toString();
+        String password = mPasswordView.getText().toString();
+
+        mAuthTask = new UserLoginTask(phonenumber, password, false);
+        //mAuthTask.execute((Void) null);
+        mAuthTask.execute();
     }
 
     public void startMap(){
@@ -77,21 +97,22 @@ public class MainActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserLoginTask extends AsyncTask<Void, Void, Integer> {
 
         private final String mPhonenumber;
         private final String mPassword;
+        private final Boolean mSignin;
 
-        UserLoginTask(String phonenumber, String password) {
+        UserLoginTask(String phonenumber, String password, Boolean signin) {
             mPhonenumber = phonenumber;
             mPassword = password;
+            mSignin = signin;
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+        protected Integer doInBackground(Void... params) {
             try {
-                String url=getString(R.string.signup_url);
+                String url=getString(mSignin ? R.string.signin_url : R.string.signup_url);
                 URL object=new URL(url);
 
                 HttpURLConnection con = (HttpURLConnection) object.openConnection();
@@ -112,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
 //display what returns the POST request
 
                 StringBuilder sb = new StringBuilder();
-                int HttpResult = con.getResponseCode();
+                Integer HttpResult = con.getResponseCode();
                 if (HttpResult == HttpURLConnection.HTTP_OK) {
                     BufferedReader br = new BufferedReader(
                             new InputStreamReader(con.getInputStream(), "utf-8"));
@@ -125,25 +146,39 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     System.out.println(con.getResponseMessage());
                 }
+
+                return HttpResult;
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            return true;
+            return HTTP_NO_CONNECTION;
         }
 
         @Override
-        protected void onPostExecute(final Boolean success) {
+        protected void onPostExecute(final Integer HttpResult) {
             mAuthTask = null;
+            if(HttpResult == HTTP_NO_CONNECTION){
+                Context context = getApplicationContext();
+                CharSequence text = "The internet connection failed.";
+                int duration = Toast.LENGTH_SHORT;
 
-            if (success) {
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
+
+            if (HttpResult == HttpURLConnection.HTTP_OK) {
                 startMap();
                 finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                if(mSignin) {
+                    if(HttpResult == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                        mPasswordView.setError(getString(R.string.error_incorrect_password));
+                        mPasswordView.requestFocus();
+                    }
+                }
             }
         }
 

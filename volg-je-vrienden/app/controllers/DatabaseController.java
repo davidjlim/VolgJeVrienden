@@ -31,6 +31,8 @@ public class DatabaseController extends Controller {
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
+        if(!checkUser(pid))
+            return notFound();
         if(!checkValidUser(pid, password))
             return unauthorized();
         return ok();
@@ -38,6 +40,7 @@ public class DatabaseController extends Controller {
     }
 
     public Result signup() {
+        System.out.println("Here!");
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
@@ -56,7 +59,7 @@ public class DatabaseController extends Controller {
             e.printStackTrace();
         }
 
-        return ok();
+        return ok("Het is allemaal gelukt");
     }
 
     public Result updateGPS(){
@@ -72,8 +75,8 @@ public class DatabaseController extends Controller {
         String sql = "UPDATE USERS GPSLONG=?, GPSLAT=? WHERE PID=?";
         Connection conn = connect();
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, gpsLong);
-            pstmt.setInt(2, gpsLat);
+            pstmt.setDouble(1, gpsLong);
+            pstmt.setDouble(2, gpsLat);
             pstmt.setString(3, pid);
             pstmt.executeUpdate();
             conn.close();

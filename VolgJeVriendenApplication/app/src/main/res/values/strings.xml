@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">VolgJeVriendenApplication</string>
-    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in">Sign in</string>
     <string name="phone_number_hint">Enter your phone number</string>
     <string name="password_hint">Enter your password</string>
     <string name="error_incorrect_password">Incorrect password</string>
-    <string name="signup_url">http://145.118.84.240:9000/signup</string>
+    <string name="signup_url">http://192.168.178.18:9000/signup</string>
     <string name="title_activity_maps">Map</string>
+    <string name="action_sign_up">Sign up</string>
+    <string name="signin_url">http://192.168.178.18:9000/signin</string>
 </resources>
