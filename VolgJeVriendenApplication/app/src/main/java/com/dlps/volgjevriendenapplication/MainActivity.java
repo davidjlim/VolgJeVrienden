@@ -51,6 +51,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void signin(View view){
+        if (mAuthTask != null) {
+            return;
+        }
+
+        // Reset errors.
+        mPhonenumberView.setError(null);
+        mPasswordView.setError(null);
+
         String phonenumber = mPhonenumberView.getText().toString();
         String password = mPasswordView.getText().toString();
 
