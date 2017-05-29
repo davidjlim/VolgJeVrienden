@@ -96,9 +96,9 @@ public class DatabaseController extends Controller {
             return unauthorized();
 
         ArrayNode result = Json.newArray();
-        String sql = "SELECT U.PID, U.GPSLONG, U.GPSLAT FROM U.USERS, F.ISFRIENDSWITH " +
+        String sql = "SELECT U.PID, U.GPSLONG, U.GPSLAT FROM USERS U, ISFRIENDSWITH F" +
                 "WHERE F.PID1 = U.PID AND F.PID2 = ?" +
-                "UNION SELECT U.PID, U.GPSLONG, U.GPSLAT FROM U.USERS, F.ISFRIENDSWITH " +
+                "UNION SELECT U.PID, U.GPSLONG, U.GPSLAT FROM USERS U, ISFRIENDSWITH F" +
                 "WHERE F.PID2 = U.PID AND F.PID1 = ?";
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
@@ -173,7 +173,37 @@ public class DatabaseController extends Controller {
     }
 
     public Result addFriend(){
+        Connection conn = connect();
 
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String pid2 = jsonNode.findPath("pid2").asText();
+        String password = jsonNode.findPath("password").asText();
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+
+        String sql = "SELECT * FROM REQUESTS WHERE PID1 = ? AND PID2 = ?";
+        String sql2 = "DELETE FROM REQUESTS WHERE PID1= ? AND PID2 = ?";
+        String sql3 = "INSERT INTO ISFRIENDSWITH VALUES (?,?)";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, pid2);
+            pstmt.setString(2, pid);
+            ResultSet rs = pstmt.executeQuery();
+            if(!rs.next()) {
+                return badRequest();
+            }
+            pstmt = conn.prepareStatement(sql2);
+            pstmt.setString(1, pid2);
+            pstmt.setString(2, pid);
+            pstmt.executeUpdate();
+            pstmt = conn.prepareStatement(sql3);
+            pstmt.setString(1, pid2);
+            pstmt.setString(2, pid);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return ok("Het ging hopelijk goed! (friends)");
     }
 
