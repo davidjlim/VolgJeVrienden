@@ -28,6 +28,7 @@ import java.sql.Statement;
  */
 public class DatabaseController extends Controller {
     public Result signup() {
+        System.out.println("Here!");
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
