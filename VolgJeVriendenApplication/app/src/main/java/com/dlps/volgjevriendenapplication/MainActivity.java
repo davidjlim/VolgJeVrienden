@@ -13,9 +13,13 @@ import org.apache.http.params.HttpConnectionParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URLConnection;
 import java.net.URL;
@@ -74,29 +78,40 @@ public class MainActivity extends AppCompatActivity {
         protected Boolean doInBackground(Void... params) {
             // TODO: attempt authentication against a network service.
             try {
-                URL url;
-                URLConnection urlConn;
-                DataOutputStream printout;
-                DataInputStream input;
-                //url = new URL (getString(R.string.signup_url));
-                url = new URL (getString(R.string.signup_url));
-                urlConn = url.openConnection();
-                urlConn.setDoInput (true);
-                urlConn.setDoOutput (true);
-                urlConn.setUseCaches (false);
-                urlConn.setRequestProperty("Content-Type","application/json");
-                //urlConn.setRequestProperty("Host", getString(R.string.host_url));
-                urlConn.connect();
-//Create JSONObject here
-                JSONObject jsonParam = new JSONObject();
-                jsonParam.put("pid", "+31 6 37355987");
-                jsonParam.put("password", "helloAkka");
+                String url=getString(R.string.signup_url);
+                URL object=new URL(url);
 
-                // Send POST output.
-                printout = new DataOutputStream(urlConn.getOutputStream ());
-                printout.writeBytes(URLEncoder.encode(jsonParam.toString(),"UTF-8"));
-                printout.flush ();
-                printout.close ();
+                HttpURLConnection con = (HttpURLConnection) object.openConnection();
+                con.setDoOutput(true);
+                con.setDoInput(true);
+                con.setRequestProperty("Content-Type", "application/json");
+                con.setRequestProperty("Accept", "application/json");
+                con.setRequestMethod("POST");
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("pid", mPhonenumber);
+                jsonParam.put("password", mPassword);
+
+                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+                wr.write(jsonParam.toString());
+                wr.flush();
+
+//display what returns the POST request
+
+                StringBuilder sb = new StringBuilder();
+                int HttpResult = con.getResponseCode();
+                if (HttpResult == HttpURLConnection.HTTP_OK) {
+                    BufferedReader br = new BufferedReader(
+                            new InputStreamReader(con.getInputStream(), "utf-8"));
+                    String line = null;
+                    while ((line = br.readLine()) != null) {
+                        sb.append(line + "\n");
+                    }
+                    br.close();
+                    System.out.println("" + sb.toString());
+                } else {
+                    System.out.println(con.getResponseMessage());
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (JSONException e) {
