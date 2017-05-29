@@ -63,8 +63,8 @@ public class DatabaseController extends Controller {
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
-        int gpsLong = jsonNode.findPath("gpsLong").asInt();
-        int gpsLat = jsonNode.findPath("gpsLat").asInt();
+        double gpsLong = jsonNode.findPath("gpsLong").asDouble();
+        double gpsLat = jsonNode.findPath("gpsLat").asDouble();
 
         if(!checkValidUser(pid, password))
             return unauthorized();
@@ -81,6 +81,41 @@ public class DatabaseController extends Controller {
             e.printStackTrace();
         }
         return ok("Het ging hopelijk goed! (gpsUpdate)");
+    }
+
+    public Result getGPS(){
+        Connection conn = connect();
+
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String password = jsonNode.findPath("password").asText();
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+
+        ArrayNode result = Json.newArray();
+        String sql = "SELECT U.PID, U.GPSLONG, U.GPSLAT FROM U.USERS, F.ISFRIENDSWITH " +
+                "WHERE F.PID1 = U.PID AND F.PID2 = ?" +
+                "UNION SELECT U.PID, U.GPSLONG, U.GPSLAT FROM U.USERS, F.ISFRIENDSWITH " +
+                "WHERE F.PID2 = U.PID AND F.PID1 = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, pid);
+            pstmt.setString(2, pid);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                ObjectNode request = Json.newObject();
+                request.put("pid", rs.getString("PID"));
+                request.put("gpsLong", rs.getString("GPSLONG"));
+                request.put("gpsLat", rs.getString("GPSLAT"));
+                System.out.println(request);
+                result.add(request);
+            }
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        return ok(result);
     }
 
     public Result makeRequest(){
