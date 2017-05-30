@@ -59,7 +59,7 @@ public class DatabaseController extends Controller {
             e.printStackTrace();
         }
 
-        return ok();
+        return ok("Did it work?");
     }
 
     public Result updateGPS(){
@@ -72,7 +72,7 @@ public class DatabaseController extends Controller {
         if(!checkValidUser(pid, password))
             return unauthorized();
 
-        String sql = "UPDATE USERS GPSLONG=?, GPSLAT=? WHERE PID=?";
+        String sql = "UPDATE USERS SET GPSLONG=?, GPSLAT=? WHERE PID=?";
         Connection conn = connect();
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setDouble(1, gpsLong);
@@ -124,16 +124,16 @@ public class DatabaseController extends Controller {
     public Result makeRequest(){
 
         JsonNode jsonNode = Controller.request().body().asJson();
-        String pid1 = jsonNode.findPath("pid1").asText();
+        String pid = jsonNode.findPath("pid").asText();
         String pid2 = jsonNode.findPath("pid2").asText();
         String password = jsonNode.findPath("password").asText();
-        if(!checkValidUser(pid1, password))
+        if(!checkValidUser(pid, password))
             return unauthorized();
 
         String sql = "INSERT INTO REQUESTS(PID1, PID2) VALUES(?, ?)";
         Connection conn = connect();
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, pid1);
+            pstmt.setString(1, pid);
             pstmt.setString(2, pid2);
             pstmt.executeUpdate();
             conn.close();
@@ -205,6 +205,37 @@ public class DatabaseController extends Controller {
             e.printStackTrace();
         }
         return ok("Het ging hopelijk goed! (friends)");
+    }
+
+    public Result getFriends(){
+        Connection conn = connect();
+
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String password = jsonNode.findPath("password").asText();
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+
+        ArrayNode result = Json.newArray();
+        String sql = "SELECT PID1 AS PID FROM ISFRIENDSWITH WHERE PID2 = ?" +
+                "UNION SELECT PID2 AS PID FROM ISFRIENDSWITH WHERE PID1 = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, pid);
+            pstmt.setString(2, pid);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                ObjectNode request = Json.newObject();
+                request.put("pid", rs.getString("PID"));
+                System.out.println(request);
+                result.add(request);
+            }
+            conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        return ok(result);
     }
 
     protected Connection connect() {
