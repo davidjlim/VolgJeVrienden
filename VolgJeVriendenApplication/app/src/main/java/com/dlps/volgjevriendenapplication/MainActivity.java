@@ -2,40 +2,29 @@ package com.dlps.volgjevriendenapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Looper;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.apache.http.params.HttpConnectionParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import static android.R.attr.path;
-import static android.provider.ContactsContract.CommonDataKinds.Website.URL;
-import static java.net.Proxy.Type.HTTP;
 
 public class MainActivity extends AppCompatActivity {
     private UserLoginTask mAuthTask = null;
@@ -44,8 +33,6 @@ public class MainActivity extends AppCompatActivity {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
-
-    public static final int HTTP_NO_CONNECTION = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
 
         mPhonenumberView = (EditText) findViewById(R.id.phonenumber);
         mPasswordView = (EditText) findViewById(R.id.password);
+
+        SharedDataHolder.getInstance().setContext(this);
 
         LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         LocationUpdater locationUpdater = new LocationUpdater();
@@ -132,50 +121,17 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         protected Integer doInBackground(Void... params) {
+            JSONObject json = new JSONObject();
             try {
-                String url=getString(mSignin ? R.string.signin_url : R.string.signup_url);
-                URL object=new URL(url);
-
-                HttpURLConnection con = (HttpURLConnection) object.openConnection();
-                con.setDoOutput(true);
-                con.setDoInput(true);
-                con.setRequestProperty("Content-Type", "application/json");
-                con.setRequestProperty("Accept", "application/json");
-                con.setRequestMethod("POST");
-
-                JSONObject jsonParam = new JSONObject();
-                jsonParam.put("pid", mPhonenumber);
-                jsonParam.put("password", mPassword);
-
-                OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
-                wr.write(jsonParam.toString());
-                wr.flush();
-
-//display what returns the POST request
-
-                StringBuilder sb = new StringBuilder();
-                Integer HttpResult = con.getResponseCode();
-                if (HttpResult == HttpURLConnection.HTTP_OK) {
-                    BufferedReader br = new BufferedReader(
-                            new InputStreamReader(con.getInputStream(), "utf-8"));
-                    String line = null;
-                    while ((line = br.readLine()) != null) {
-                        sb.append(line + "\n");
-                    }
-                    br.close();
-                    System.out.println("" + sb.toString());
-                } else {
-                    System.out.println(con.getResponseMessage());
-                }
-
-                return HttpResult;
-            } catch (IOException e) {
-                e.printStackTrace();
+                json.put("pid", mPhonenumber);
+                json.put("password", mPassword);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
 
-            return HTTP_NO_CONNECTION;
+            String url=getString(R.string.ip_address) + getString(mSignin ? R.string.signin_url : R.string.signup_url);
+
+            return ServerConnector.postRequest(url,json).getHttpResult();
         }
 
         @Override
@@ -183,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
             mAuthTask = null;
             if (HttpResult == HttpURLConnection.HTTP_OK) {
                 SharedDataHolder.getInstance().setPassword(mPassword);
+                SharedDataHolder.getInstance().setPhonenumber(mPhonenumber);
+                SharedDataHolder.getInstance().getLocationUpdater().updateGPS();
                 startMap();
                 finish();
                 return;
@@ -190,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
             CharSequence text;
             switch(HttpResult){
-                case HTTP_NO_CONNECTION: text = getString(R.string.no_connection); break;
+                case ServerConnector.HTTP_NO_CONNECTION: text = getString(R.string.no_connection); break;
                 case HttpURLConnection.HTTP_NOT_FOUND : text = getString(R.string.user_not_found); break;
                 case HttpURLConnection.HTTP_UNAUTHORIZED : text = getString(R.string.incorrect_password); break;
                 case HttpURLConnection.HTTP_BAD_REQUEST : text = getString(R.string.phonenumber_taken); break;

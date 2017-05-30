@@ -27,7 +27,16 @@ import java.sql.Statement;
  * Created by s1511432 on 17/05/17.
  */
 public class DatabaseController extends Controller {
+    Connection conn;
+
+    public DatabaseController() {
+        //conn = connect();
+    }
+
     public Result signin(){
+        if(conn == null)
+            conn = connect();
+        System.out.printf("Signing in");
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
@@ -40,7 +49,8 @@ public class DatabaseController extends Controller {
     }
 
     public Result signup() {
-        System.out.println("Here!");
+        if(conn == null)
+            conn = connect();
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
@@ -54,7 +64,6 @@ public class DatabaseController extends Controller {
             pstmt.setString(1, pid);
             pstmt.setString(2, DigestUtils.sha1Hex(password));
             pstmt.executeUpdate();
-            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -63,23 +72,25 @@ public class DatabaseController extends Controller {
     }
 
     public Result updateGPS(){
+        if(conn == null)
+            conn = connect();
+        System.out.println("Updating GPS");
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
         double gpsLong = jsonNode.findPath("gpsLong").asDouble();
         double gpsLat = jsonNode.findPath("gpsLat").asDouble();
+        System.out.println(jsonNode.toString());
 
         if(!checkValidUser(pid, password))
             return unauthorized();
 
-        String sql = "UPDATE USERS GPSLONG=?, GPSLAT=? WHERE PID=?";
-        Connection conn = connect();
+        String sql = "UPDATE USERS SET GPSLONG=?, GPSLAT=? WHERE PID=?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setDouble(1, gpsLong);
             pstmt.setDouble(2, gpsLat);
             pstmt.setString(3, pid);
             pstmt.executeUpdate();
-            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -87,8 +98,8 @@ public class DatabaseController extends Controller {
     }
 
     public Result getGPS(){
-        Connection conn = connect();
-
+        if(conn == null)
+            conn = connect();
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
@@ -113,7 +124,6 @@ public class DatabaseController extends Controller {
                 System.out.println(request);
                 result.add(request);
             }
-            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -122,7 +132,8 @@ public class DatabaseController extends Controller {
     }
 
     public Result makeRequest(){
-
+        if(conn == null)
+            conn = connect();
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid1 = jsonNode.findPath("pid1").asText();
         String pid2 = jsonNode.findPath("pid2").asText();
@@ -131,12 +142,10 @@ public class DatabaseController extends Controller {
             return unauthorized();
 
         String sql = "INSERT INTO REQUESTS(PID1, PID2) VALUES(?, ?)";
-        Connection conn = connect();
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, pid1);
             pstmt.setString(2, pid2);
             pstmt.executeUpdate();
-            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -144,8 +153,8 @@ public class DatabaseController extends Controller {
     }
 
     public Result getRequests(){
-        Connection conn = connect();
-
+        if(conn == null)
+            conn = connect();
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
@@ -164,7 +173,6 @@ public class DatabaseController extends Controller {
                 System.out.println(request);
                 result.add(request);
             }
-            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -173,8 +181,8 @@ public class DatabaseController extends Controller {
     }
 
     public Result addFriend(){
-        Connection conn = connect();
-
+        if(conn == null)
+            conn = connect();
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String pid2 = jsonNode.findPath("pid2").asText();
@@ -221,11 +229,9 @@ public class DatabaseController extends Controller {
         String select = "SELECT * FROM USERS WHERE PID = ?";
 
         try {
-            Connection connection = connect();
-            PreparedStatement pstmt = connection.prepareStatement(select);
+            PreparedStatement pstmt = conn.prepareStatement(select);
             pstmt.setString(1,pid);
             ResultSet rs = pstmt.executeQuery();
-            connection.close();
             if(!rs.next())
                 return false;
             return true;
@@ -240,12 +246,10 @@ public class DatabaseController extends Controller {
         String select = "SELECT * FROM USERS WHERE PID = ? AND PASSWORDHASH = ?";
 
         try {
-            Connection connection = connect();
-            PreparedStatement pstmt = connection.prepareStatement(select);
+            PreparedStatement pstmt = conn.prepareStatement(select);
             pstmt.setString(1,pid);
             pstmt.setString(2, DigestUtils.sha1Hex(password));
             ResultSet rs = pstmt.executeQuery();
-            connection.close();
             if(!rs.next())
                 return false;
             return true;

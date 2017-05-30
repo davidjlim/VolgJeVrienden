@@ -16,6 +16,8 @@ POST    /signin                     controllers.DatabaseController.signin
 
 POST    /signup                     controllers.DatabaseController.signup
 
+POST    /updateGPS                  controllers.DatabaseController.updateGPS
+
 POST    /makeRequest                controllers.DatabaseController.makeRequest
 
 POST    /getRequests                controllers.DatabaseController.getRequests

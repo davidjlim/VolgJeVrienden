@@ -1,7 +1,10 @@
 package com.dlps.volgjevriendenapplication;
 
 import android.content.Context;
+import android.location.Location;
 import android.location.LocationManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -10,11 +13,17 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
+    private static final long TIME_BETWEEN_REFRESH = 1000;
     private GoogleMap mMap;
+    Marker ownMarker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,9 +49,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        final Handler handler = new Handler();
+        final Runnable myRunnable = new Runnable(){
+            @Override
+            public void run() {
+                drawScreen();
+                handler.postDelayed(this, TIME_BETWEEN_REFRESH);
+            }
+        };
+        handler.postDelayed(myRunnable, 0);
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(ownMarker.getPosition()));
+    }
+
+    public void drawScreen(){
+        mMap.
+        Location currentLocation = SharedDataHolder.getInstance().getLocationUpdater().getCurrentLocation();
+        LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+        ownMarker = mMap.addMarker(new MarkerOptions().position(currentLatLng).title("This is you!"));
     }
 }
