@@ -2,6 +2,7 @@ package com.dlps.volgjevriendenapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.os.StrictMode;
@@ -22,11 +23,15 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import static android.R.attr.path;
 import static android.provider.ContactsContract.CommonDataKinds.Website.URL;
@@ -52,6 +57,11 @@ public class MainActivity extends AppCompatActivity {
 
         mPhonenumberView = (EditText) findViewById(R.id.phonenumber);
         mPasswordView = (EditText) findViewById(R.id.password);
+
+        LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        LocationUpdater locationUpdater = new LocationUpdater();
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,locationUpdater);
+        SharedDataHolder.getInstance().setLocationUpdater(locationUpdater);
     }
 
     public void signin(View view){
@@ -59,16 +69,31 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Reset errors.
-        mPhonenumberView.setError(null);
-        mPasswordView.setError(null);
-
         String phonenumber = mPhonenumberView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        String password = sha1(mPasswordView.getText().toString());
 
         mAuthTask = new UserLoginTask(phonenumber, password, true);
         //mAuthTask.execute((Void) null);
         mAuthTask.execute();
+    }
+
+    private static String sha1(String s)
+    {
+        MessageDigest digest;
+        try
+        {
+            digest = MessageDigest.getInstance("SHA-1");
+            digest.update(s.getBytes(Charset.forName("US-ASCII")),0,s.length());
+            byte[] magnitude = digest.digest();
+            BigInteger bi = new BigInteger(1, magnitude);
+            String hash = String.format("%0" + (magnitude.length << 1) + "x", bi);
+            return hash;
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     public void signup(View view){
@@ -76,12 +101,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        // Reset errors.
-        mPhonenumberView.setError(null);
-        mPasswordView.setError(null);
-
         String phonenumber = mPhonenumberView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        String password = sha1(mPasswordView.getText().toString());
 
         mAuthTask = new UserLoginTask(phonenumber, password, false);
         //mAuthTask.execute((Void) null);
@@ -160,26 +181,27 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final Integer HttpResult) {
             mAuthTask = null;
-            if(HttpResult == HTTP_NO_CONNECTION){
-                Context context = getApplicationContext();
-                CharSequence text = "The internet connection failed.";
-                int duration = Toast.LENGTH_SHORT;
-
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
-            }
-
             if (HttpResult == HttpURLConnection.HTTP_OK) {
+                SharedDataHolder.getInstance().setPassword(mPassword);
                 startMap();
                 finish();
-            } else {
-                if(mSignin) {
-                    if(HttpResult == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                        mPasswordView.setError(getString(R.string.error_incorrect_password));
-                        mPasswordView.requestFocus();
-                    }
-                }
+                return;
             }
+
+            CharSequence text;
+            switch(HttpResult){
+                case HTTP_NO_CONNECTION: text = getString(R.string.no_connection); break;
+                case HttpURLConnection.HTTP_NOT_FOUND : text = getString(R.string.user_not_found); break;
+                case HttpURLConnection.HTTP_UNAUTHORIZED : text = getString(R.string.incorrect_password); break;
+                case HttpURLConnection.HTTP_BAD_REQUEST : text = getString(R.string.phonenumber_taken); break;
+                default: text = getString(R.string.something_went_wrong);
+            }
+
+            Context context = getApplicationContext();
+            int duration = Toast.LENGTH_SHORT;
+
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
         }
 
         @Override

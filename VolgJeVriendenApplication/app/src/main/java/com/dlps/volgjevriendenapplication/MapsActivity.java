@@ -1,5 +1,7 @@
 package com.dlps.volgjevriendenapplication;
 
+import android.content.Context;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 

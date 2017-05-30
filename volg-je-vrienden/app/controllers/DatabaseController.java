@@ -59,7 +59,7 @@ public class DatabaseController extends Controller {
             e.printStackTrace();
         }
 
-        return ok("Het is allemaal gelukt");
+        return ok();
     }
 
     public Result updateGPS(){
