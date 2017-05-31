@@ -1,8 +1,30 @@
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.dlps.volgjevriendenapplication.MapsActivity">
+<include xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/toolbar" layout="@layout/toolbar"
+    app:layout_constraintTop_toTopOf="parent"
+    android:layout_marginTop="0dp"
+    android:layout_marginBottom="40dp"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/actionBarSize"
+    />
+
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/map"
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.dlps.volgjevriendenapplication.MapsActivity" />
+    android:layout_height="wrap_content"
+    app:layout_constraintTop_toBottomOf="@+id/toolbar"
+    tools:context="com.dlps.volgjevriendenapplication.MapsActivity" >
+
+        <!--app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>-->
+</fragment>
+</android.support.constraint.ConstraintLayout>

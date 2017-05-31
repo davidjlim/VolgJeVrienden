@@ -40,7 +40,7 @@ public class LocationUpdater implements android.location.LocationListener {
         currentLocation = getLastKnownLocation();
     }
 
-    private Location getLastKnownLocation() {
+    public Location getLastKnownLocation() {
         mLocationManager = (LocationManager)SharedDataHolder.getInstance().getContext()
                 .getSystemService(SharedDataHolder.getInstance().getContext().LOCATION_SERVICE);
         List<String> providers = mLocationManager.getProviders(true);
@@ -65,6 +65,9 @@ public class LocationUpdater implements android.location.LocationListener {
     }
 
     public void updateGPS(){
+        if(SharedDataHolder.getInstance().getPhonenumber() == null)
+            return;
+
         System.out.printf("updating ...");
         if(currentLocation == null)
             return;

@@ -51,6 +51,7 @@ public class DatabaseController extends Controller {
     public Result signup() {
         if(conn == null)
             conn = connect();
+        System.out.printf("Signing up");
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
