@@ -32,7 +32,7 @@ public class DatabaseController extends Controller {
     public Result signin(){
         if(conn == null)
             conn = connect();
-        System.out.printf("Signing in");
+        System.out.println("Signing in");
         JsonNode jsonNode = Controller.request().body().asJson();
         System.out.println(jsonNode.toString());
         String pid = jsonNode.findPath("pid").asText();
@@ -57,7 +57,7 @@ public class DatabaseController extends Controller {
             return badRequest();
         String sql = "INSERT INTO USERS(PID, PASSWORDHASH, IMAGE) VALUES(?, ?, NULL)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try {PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
             pstmt.setString(2, DigestUtils.sha1Hex(password));
             pstmt.executeUpdate();
@@ -116,8 +116,8 @@ public class DatabaseController extends Controller {
             while (rs.next()) {
                 ObjectNode request = Json.newObject();
                 request.put("pid", rs.getString("PID"));
-                request.put("gpsLong", rs.getString("GPSLONG"));
-                request.put("gpsLat", rs.getString("GPSLAT"));
+                request.put("gpsLong", rs.getDouble("GPSLONG"));
+                request.put("gpsLat", rs.getDouble("GPSLAT"));
                 System.out.println(request);
                 result.add(request);
             }
@@ -223,8 +223,11 @@ public class DatabaseController extends Controller {
             return unauthorized();
 
         ArrayNode result = Json.newArray();
-        String sql = "SELECT PID1 AS PID FROM ISFRIENDSWITH WHERE PID2 = ?" +
-                "UNION SELECT PID2 AS PID FROM ISFRIENDSWITH WHERE PID1 = ?";
+        String sql = "SELECT U.PID, U.IMAGE, U.GPSLONG, U.GPSLAT " +
+                "FROM ((SELECT PID1 AS PID FROM ISFRIENDSWITH WHERE PID2 = ? " +
+                "UNION SELECT PID2 AS PID FROM ISFRIENDSWITH WHERE PID1 = ?) AS P) " +
+                "INNER JOIN USERS U " +
+                "ON U.PID = P.PID";
         try {
             PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
@@ -233,6 +236,58 @@ public class DatabaseController extends Controller {
             while (rs.next()) {
                 ObjectNode request = Json.newObject();
                 request.put("pid", rs.getString("PID"));
+                request.put("image", rs.getString("IMAGE"));
+                request.put("gpsLong", rs.getObject("GPSLONG") != null ? rs.getDouble("GPSLONG") : null);
+                request.put("gpsLat", rs.getObject("GPSLAT") != null ? rs.getDouble("GPSLAT") : null);
+                System.out.println(request);
+                result.add(request);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        return ok(result);
+    }
+
+    public Result addImage(){
+        if(conn == null)
+            conn = connect();
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String password = jsonNode.findPath("password").asText();
+        String image = jsonNode.findPath("image").asText();
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+
+        String sql = "UPDATE USERS SET IMAGE=? WHERE PID=?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, image);
+            pstmt.setString(2, pid);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ok("Het ging hopelijk goed! (addImage)");
+    }
+
+    public Result getOwnImage(){
+        if(conn == null)
+            conn = connect();
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String password = jsonNode.findPath("password").asText();
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+
+        ArrayNode result = Json.newArray();
+        String sql = "SELECT IMAGE FROM USERS WHERE PID = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, pid);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                ObjectNode request = Json.newObject();
+                request.put("image", rs.getString("IMAGE"));
                 System.out.println(request);
                 result.add(request);
             }
