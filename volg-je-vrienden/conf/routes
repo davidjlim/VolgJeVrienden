@@ -21,3 +21,7 @@ POST    /updateGPS                  controllers.DatabaseController.updateGPS
 POST    /makeRequest                controllers.DatabaseController.makeRequest
 
 POST    /getRequests                controllers.DatabaseController.getRequests
+
+POST    /getFriends                 controllers.DatabaseController.getFriends
+
+POST    /addImage                   controllers.DatabaseController.addImage
