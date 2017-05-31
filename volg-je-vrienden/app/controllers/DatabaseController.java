@@ -51,6 +51,7 @@ public class DatabaseController extends Controller {
     public Result signup() {
         if(conn == null)
             conn = connect();
+        System.out.printf("Signing up");
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
@@ -59,8 +60,7 @@ public class DatabaseController extends Controller {
             return badRequest();
         String sql = "INSERT INTO USERS(PID, PASSWORDHASH, IMAGE) VALUES(?, ?, NULL)";
 
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try {PreparedStatement pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
             pstmt.setString(2, DigestUtils.sha1Hex(password));
             pstmt.executeUpdate();
