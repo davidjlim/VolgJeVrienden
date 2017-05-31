@@ -273,6 +273,33 @@ public class DatabaseController extends Controller {
         return ok("Het ging hopelijk goed! (addImage)");
     }
 
+    public Result getOwnImage(){
+        if(conn == null)
+            conn = connect();
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String password = jsonNode.findPath("password").asText();
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+
+        ArrayNode result = Json.newArray();
+        String sql = "SELECT IMAGE FROM USERS WHERE PID = ?";
+        try {
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, pid);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                ObjectNode request = Json.newObject();
+                request.put("image", rs.getString("IMAGE"));
+                System.out.println(request);
+                result.add(request);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        return ok(result);
+    }
 
     protected Connection connect() {
         Connection connection = null;
