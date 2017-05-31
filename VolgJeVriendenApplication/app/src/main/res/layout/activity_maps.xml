@@ -7,7 +7,7 @@
     tools:context="com.dlps.volgjevriendenapplication.MapsActivity">
 <include xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/toolbar" layout="@layout/toolbar"
+    android:id="@+id/my_toolbar" layout="@layout/toolbar"
     app:layout_constraintTop_toTopOf="parent"
     android:layout_marginTop="0dp"
     android:layout_marginBottom="40dp"

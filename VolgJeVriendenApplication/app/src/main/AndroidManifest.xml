@@ -3,6 +3,7 @@
     package="com.dlps.volgjevriendenapplication">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -43,6 +44,9 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"></activity>
+        <activity
+            android:name=".PhotoActivity"
+            android:label="@string/title_activity_photo"></activity>
     </application>
 
 </manifest>

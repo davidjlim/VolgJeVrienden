@@ -4,4 +4,5 @@
     <dimen name="toolbarElevation">4dp</dimen>
     <dimen name="appBarTopMargin">24dp</dimen>
     <dimen name="statusBarHeight">24dp</dimen>
+    <dimen name="activity_vertical_margin">10dp</dimen>
 </resources>

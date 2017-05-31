@@ -29,15 +29,12 @@ import java.sql.Statement;
 public class DatabaseController extends Controller {
     Connection conn;
 
-    public DatabaseController() {
-        //conn = connect();
-    }
-
     public Result signin(){
         if(conn == null)
             conn = connect();
         System.out.printf("Signing in");
         JsonNode jsonNode = Controller.request().body().asJson();
+        System.out.println(jsonNode.toString());
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
         if(!checkUser(pid))
@@ -60,8 +57,7 @@ public class DatabaseController extends Controller {
             return badRequest();
         String sql = "INSERT INTO USERS(PID, PASSWORDHASH, IMAGE) VALUES(?, ?, NULL)";
 
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, pid);
             pstmt.setString(2, DigestUtils.sha1Hex(password));
             pstmt.executeUpdate();
@@ -217,7 +213,8 @@ public class DatabaseController extends Controller {
     }
 
     public Result getFriends(){
-        Connection conn = connect();
+        if(conn == null)
+            conn = connect();
 
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
@@ -239,7 +236,6 @@ public class DatabaseController extends Controller {
                 System.out.println(request);
                 result.add(request);
             }
-            conn.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -258,6 +254,9 @@ public class DatabaseController extends Controller {
     }
 
     protected Boolean checkUser(String pid){
+        if(conn == null)
+            conn = connect();
+
         String select = "SELECT * FROM USERS WHERE PID = ?";
 
         try {
@@ -275,6 +274,9 @@ public class DatabaseController extends Controller {
     }
 
     protected Boolean checkValidUser(String pid, String password){
+        if(conn == null)
+            conn = connect();
+
         String select = "SELECT * FROM USERS WHERE PID = ? AND PASSWORDHASH = ?";
 
         try {
