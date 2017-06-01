@@ -18,7 +18,7 @@ public class SettingsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        SharedDataHolder.getInstance().setContext(this);
+        DataHolder.getInstance().setContext(this);
 
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new MyPreferenceFragment()).commit();
     }
@@ -34,7 +34,9 @@ public class SettingsActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
                     System.out.println("Hoi");
-                    startActivity(new Intent(SharedDataHolder.getInstance().getContext(), PhotoActivity.class));
+                    System.out.println(DataHolder.getInstance().getPhonenumber());
+                    startActivityForResult(new Intent(DataHolder.getInstance().getContext(), PhotoActivity.class), 0);
+                    System.out.println("Doei");
                     return true;
                 }
             });

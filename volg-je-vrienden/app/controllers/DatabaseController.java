@@ -42,7 +42,6 @@ public class DatabaseController extends Controller {
         if(!checkValidUser(pid, password))
             return unauthorized();
         return ok();
-
     }
 
     public Result signup() {
@@ -56,13 +55,20 @@ public class DatabaseController extends Controller {
         if(checkUser(pid))
             return badRequest();
         String sql = "INSERT INTO USERS(PID, PASSWORDHASH, IMAGE) VALUES(?, ?, NULL)";
-
-        try {PreparedStatement pstmt = conn.prepareStatement(sql);
+        PreparedStatement pstmt = null;
+        try {pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
             pstmt.setString(2, DigestUtils.sha1Hex(password));
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
 
         return ok("Did it work?");
@@ -83,13 +89,21 @@ public class DatabaseController extends Controller {
             return unauthorized();
 
         String sql = "UPDATE USERS SET GPSLONG=?, GPSLAT=? WHERE PID=?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        PreparedStatement pstmt = null;
+        try {pstmt = conn.prepareStatement(sql);
             pstmt.setDouble(1, gpsLong);
             pstmt.setDouble(2, gpsLat);
             pstmt.setString(3, pid);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
         return ok("Het ging hopelijk goed! (gpsUpdate)");
     }
@@ -108,8 +122,9 @@ public class DatabaseController extends Controller {
                 "WHERE F.PID1 = U.PID AND F.PID2 = ?" +
                 "UNION SELECT U.PID, U.GPSLONG, U.GPSLAT FROM USERS U, ISFRIENDSWITH F" +
                 "WHERE F.PID2 = U.PID AND F.PID1 = ?";
+        PreparedStatement pstmt = null;
         try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
             pstmt.setString(2, pid);
             ResultSet rs = pstmt.executeQuery();
@@ -123,6 +138,13 @@ public class DatabaseController extends Controller {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
         System.out.println(result);
         return ok(result);
@@ -139,12 +161,20 @@ public class DatabaseController extends Controller {
             return unauthorized();
 
         String sql = "INSERT INTO REQUESTS(PID1, PID2) VALUES(?, ?)";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        PreparedStatement pstmt = null;
+        try {pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
             pstmt.setString(2, pid2);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
         return ok("Het ging hopelijk goed! (request)");
     }
@@ -160,8 +190,9 @@ public class DatabaseController extends Controller {
 
         ArrayNode result = Json.newArray();
         String sql = "SELECT * FROM REQUESTS WHERE PID2 = ?";
+        PreparedStatement pstmt = null;
         try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -172,6 +203,13 @@ public class DatabaseController extends Controller {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
         System.out.println(result);
         return ok(result);
@@ -190,12 +228,14 @@ public class DatabaseController extends Controller {
         String sql = "SELECT * FROM REQUESTS WHERE PID1 = ? AND PID2 = ?";
         String sql2 = "DELETE FROM REQUESTS WHERE PID1= ? AND PID2 = ?";
         String sql3 = "INSERT INTO ISFRIENDSWITH VALUES (?,?)";
+        PreparedStatement pstmt = null;
         try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid2);
             pstmt.setString(2, pid);
             ResultSet rs = pstmt.executeQuery();
             if(!rs.next()) {
+                pstmt.close();
                 return badRequest();
             }
             pstmt = conn.prepareStatement(sql2);
@@ -208,6 +248,13 @@ public class DatabaseController extends Controller {
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
         return ok("Het ging hopelijk goed! (friends)");
     }
@@ -228,8 +275,9 @@ public class DatabaseController extends Controller {
                 "UNION SELECT PID2 AS PID FROM ISFRIENDSWITH WHERE PID1 = ?) AS P) " +
                 "INNER JOIN USERS U " +
                 "ON U.PID = P.PID";
+        PreparedStatement pstmt = null;
         try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
             pstmt.setString(2, pid);
             ResultSet rs = pstmt.executeQuery();
@@ -244,28 +292,46 @@ public class DatabaseController extends Controller {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
         System.out.println(result);
         return ok(result);
     }
 
-    public Result addImage(){
+    public Result addImage() throws SQLException {
         if(conn == null)
             conn = connect();
+        System.out.printf("Adding image...");
         JsonNode jsonNode = Controller.request().body().asJson();
+        System.out.println(jsonNode.toString());
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
         String image = jsonNode.findPath("image").asText();
+        System.out.println(image.length());
         if(!checkValidUser(pid, password))
             return unauthorized();
 
         String sql = "UPDATE USERS SET IMAGE=? WHERE PID=?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        PreparedStatement pstmt = null;
+        try {pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, image);
             pstmt.setString(2, pid);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
         return ok("Het ging hopelijk goed! (addImage)");
     }
@@ -281,8 +347,9 @@ public class DatabaseController extends Controller {
 
         ArrayNode result = Json.newArray();
         String sql = "SELECT IMAGE FROM USERS WHERE PID = ?";
+        PreparedStatement pstmt = null;
         try {
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
@@ -293,6 +360,13 @@ public class DatabaseController extends Controller {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
         System.out.println(result);
         return ok(result);
@@ -314,36 +388,58 @@ public class DatabaseController extends Controller {
 
         String select = "SELECT * FROM USERS WHERE PID = ?";
 
+        PreparedStatement pstmt = null;
         try {
-            PreparedStatement pstmt = conn.prepareStatement(select);
+            pstmt = conn.prepareStatement(select);
             pstmt.setString(1,pid);
             ResultSet rs = pstmt.executeQuery();
-            if(!rs.next())
+            if(!rs.next()) {
+                pstmt.close();
                 return false;
+            }
+            pstmt.close();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
 
         return false;
     }
 
-    protected Boolean checkValidUser(String pid, String password){
+    protected Boolean checkValidUser(String pid, String password) {
         if(conn == null)
             conn = connect();
 
         String select = "SELECT * FROM USERS WHERE PID = ? AND PASSWORDHASH = ?";
 
+        PreparedStatement pstmt = null;
         try {
-            PreparedStatement pstmt = conn.prepareStatement(select);
+            pstmt = conn.prepareStatement(select);
             pstmt.setString(1,pid);
             pstmt.setString(2, DigestUtils.sha1Hex(password));
             ResultSet rs = pstmt.executeQuery();
-            if(!rs.next())
+            if(!rs.next()) {
+                pstmt.close();
                 return false;
+            }
+            pstmt.close();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
         }
 
         return false;

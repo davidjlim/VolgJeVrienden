@@ -3,10 +3,7 @@ package com.dlps.volgjevriendenapplication;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Handler;
-import android.os.Looper;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -21,9 +18,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -88,7 +82,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         };
         handler.postDelayed(myRunnable, 0);
 
-        Location currentLocation = SharedDataHolder.getInstance().getLocationUpdater().getLastKnownLocation();
+        Location currentLocation = DataHolder.getInstance().getLocationUpdater().getLastKnownLocation();
         if(currentLocation != null) {
             locationUnknown = false;
             LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
@@ -101,7 +95,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void drawScreen(){
         mMap.clear();
-        Location currentLocation = SharedDataHolder.getInstance().getLocationUpdater().getLastKnownLocation();
+        Location currentLocation = DataHolder.getInstance().getLocationUpdater().getLastKnownLocation();
         if(currentLocation != null) {
             locationUnknown = false;
             LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());

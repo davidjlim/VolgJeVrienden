@@ -1,21 +1,13 @@
 package com.dlps.volgjevriendenapplication;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.Context;
-import android.content.res.Resources;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
-
-import static java.security.AccessController.getContext;
 
 /**
  * Created by pim on 30-5-17.
@@ -41,8 +33,8 @@ public class LocationUpdater implements android.location.LocationListener {
     }
 
     public Location getLastKnownLocation() {
-        mLocationManager = (LocationManager)SharedDataHolder.getInstance().getContext()
-                .getSystemService(SharedDataHolder.getInstance().getContext().LOCATION_SERVICE);
+        mLocationManager = (LocationManager)DataHolder.getInstance().getContext()
+                .getSystemService(DataHolder.getInstance().getContext().LOCATION_SERVICE);
         List<String> providers = mLocationManager.getProviders(true);
         Location bestLocation = null;
         for (String provider : providers) {
@@ -65,7 +57,7 @@ public class LocationUpdater implements android.location.LocationListener {
     }
 
     public void updateGPS(){
-        if(SharedDataHolder.getInstance().getPhonenumber() == null)
+        if(DataHolder.getInstance().getPhonenumber() == null)
             return;
 
         System.out.printf("updating ...");
@@ -73,13 +65,13 @@ public class LocationUpdater implements android.location.LocationListener {
             return;
         System.out.println("still updating...");
 
-        String url = SharedDataHolder.getInstance().getContext().getResources().getString(R.string.ip_address) +
-                SharedDataHolder.getInstance().getContext().getResources().getString(R.string.updateGPS_url);
+        String url = DataHolder.getInstance().getContext().getResources().getString(R.string.ip_address) +
+                DataHolder.getInstance().getContext().getResources().getString(R.string.updateGPS_url);
         System.out.println(url);
         JSONObject json = new JSONObject();
         try {
-            json.put("pid", SharedDataHolder.getInstance().getPhonenumber());
-            json.put("password", SharedDataHolder.getInstance().getPassword());
+            json.put("pid", DataHolder.getInstance().getPhonenumber());
+            json.put("password", DataHolder.getInstance().getPassword());
             json.put("gpsLong", currentLocation.getLongitude());
             json.put("gpsLat", currentLocation.getLatitude());
         } catch (JSONException e) {

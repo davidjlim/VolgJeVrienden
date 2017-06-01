@@ -3,10 +3,10 @@ package com.dlps.volgjevriendenapplication;
 import android.content.Context;
 
 /**
- * Created by pim on 30-5-17.
+ * Created by pim on 31-5-17.
  */
 
-public class SharedDataHolder {
+public class DataHolder {
     public String getPassword() {
         return password;
     }
@@ -45,6 +45,12 @@ public class SharedDataHolder {
 
     private Context context;
 
-    private static final SharedDataHolder holder = new SharedDataHolder();
-    public static SharedDataHolder getInstance() {return holder;}
+    private static final DataHolder ourInstance = new DataHolder();
+
+    public static DataHolder getInstance() {
+        return ourInstance;
+    }
+
+    private DataHolder() {
+    }
 }

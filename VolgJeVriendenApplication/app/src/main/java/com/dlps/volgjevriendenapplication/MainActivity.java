@@ -2,7 +2,6 @@ package com.dlps.volgjevriendenapplication;
 
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.StrictMode;
@@ -10,8 +9,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -21,13 +18,8 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -51,12 +43,12 @@ public class MainActivity extends AppCompatActivity {
         mPhonenumberView = (EditText) findViewById(R.id.phonenumber);
         mPasswordView = (EditText) findViewById(R.id.password);
 
-        SharedDataHolder.getInstance().setContext(this);
+        DataHolder.getInstance().setContext(this);
 
         LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
         LocationUpdater locationUpdater = new LocationUpdater();
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,locationUpdater);
-        SharedDataHolder.getInstance().setLocationUpdater(locationUpdater);
+        DataHolder.getInstance().setLocationUpdater(locationUpdater);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setTitle("Log in");
@@ -70,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void signin(View view){
+        System.out.println("Signing in...");
         if (mAuthTask != null) {
             return;
         }
@@ -154,9 +147,9 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(final Integer HttpResult) {
             mAuthTask = null;
             if (HttpResult == HttpURLConnection.HTTP_OK) {
-                SharedDataHolder.getInstance().setPassword(mPassword);
-                SharedDataHolder.getInstance().setPhonenumber(mPhonenumber);
-                SharedDataHolder.getInstance().getLocationUpdater().updateGPS();
+                DataHolder.getInstance().setPassword(mPassword);
+                DataHolder.getInstance().setPhonenumber(mPhonenumber);
+                DataHolder.getInstance().getLocationUpdater().updateGPS();
                 startMap();
                 finish();
                 return;
