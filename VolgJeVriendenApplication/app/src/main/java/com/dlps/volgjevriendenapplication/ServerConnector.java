@@ -20,6 +20,7 @@ public class ServerConnector {
     public static HttpResultMessage postRequest(String url, JSONObject json){
         try {
             URL object=new URL(url);
+            System.out.println("SHoi");
 
             HttpURLConnection con = (HttpURLConnection) object.openConnection();
             con.setDoOutput(true);
@@ -33,10 +34,13 @@ public class ServerConnector {
             wr.flush();
 
 //display what returns the POST request
+            System.out.println("SHai");
 
             StringBuilder sb = new StringBuilder();
             Integer HttpResult = con.getResponseCode();
             if (HttpResult == HttpURLConnection.HTTP_OK) {
+                System.out.println("SHi");
+
                 BufferedReader br = new BufferedReader(
                         new InputStreamReader(con.getInputStream(), "utf-8"));
                 String line = null;
@@ -46,6 +50,7 @@ public class ServerConnector {
                 br.close();
                 return new HttpResultMessage(HttpResult, sb.toString());
             } else {
+                System.out.println("SHoi");
                 return new HttpResultMessage(HttpResult, "");
             }
 

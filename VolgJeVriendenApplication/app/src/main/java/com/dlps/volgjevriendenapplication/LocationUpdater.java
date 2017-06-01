@@ -1,5 +1,6 @@
 package com.dlps.volgjevriendenapplication;
 
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -29,7 +30,10 @@ public class LocationUpdater implements android.location.LocationListener {
     private LocationManager mLocationManager;
 
     public LocationUpdater() {
+        LocationManager locationManager = (LocationManager)DataHolder.getInstance().getContext().getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,this);
         currentLocation = getLastKnownLocation();
+        updateGPS();
     }
 
     public Location getLastKnownLocation() {

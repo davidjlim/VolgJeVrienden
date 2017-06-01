@@ -262,13 +262,16 @@ public class DatabaseController extends Controller {
     public Result getFriends(){
         if(conn == null)
             conn = connect();
+        System.out.println("Getting friends...");
 
         JsonNode jsonNode = Controller.request().body().asJson();
+        System.out.println(jsonNode.toString());
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
+        System.out.println("Hoi");
         if(!checkValidUser(pid, password))
             return unauthorized();
-
+        System.out.println("Hai");
         ArrayNode result = Json.newArray();
         String sql = "SELECT U.PID, U.IMAGE, U.GPSLONG, U.GPSLAT " +
                 "FROM ((SELECT PID1 AS PID FROM ISFRIENDSWITH WHERE PID2 = ? " +
@@ -280,8 +283,10 @@ public class DatabaseController extends Controller {
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
             pstmt.setString(2, pid);
+            System.out.println("Hi");
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
+                System.out.println("Hoi");
                 ObjectNode request = Json.newObject();
                 request.put("pid", rs.getString("PID"));
                 request.put("image", rs.getString("IMAGE"));
