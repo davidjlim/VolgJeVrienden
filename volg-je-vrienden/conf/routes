@@ -30,3 +30,4 @@ POST    /getOwnImage                controllers.DatabaseController.getOwnImage
 
 POST    /addFriend                  controllers.DatabaseController.addFriend
 
+POST    /removeFriend               controllers.DatabaseController.removeFriend

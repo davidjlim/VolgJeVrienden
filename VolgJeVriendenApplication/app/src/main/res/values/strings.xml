@@ -4,7 +4,8 @@
     <string name="phone_number_hint">Enter your phone number</string>
     <string name="password_hint">Enter your password</string>
     <string name="error_incorrect_password">Incorrect password</string>
-    <string name="ip_address">http://145.118.85.55:9000/</string>
+    <!-- <string name="ip_address">http://145.118.85.55:9000/</string> -->
+    <string name="ip_address">http://ptweb.liacs.nl/team07/</string>
     <string name="signup_url">signup</string>
     <string name="title_activity_maps">Map</string>
     <string name="action_sign_up">Sign up</string>
@@ -34,7 +35,9 @@
     <string name="title_activity_photo">Photo</string>
     <string name="add_image_url">addImage</string>
     <string name="action_requests">Manage requests</string>
+    <string name="action_friends">Friend List</string>
     <string name="title_activity_requests">Requests</string>
+    <string name="title_activity_friends">Friends</string>
     <string name="get_friends_url">getFriends</string>
     <string name="get_requests_url">getRequests</string>
 

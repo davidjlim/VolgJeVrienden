@@ -18,6 +18,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -70,6 +71,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         } else if(id == R.id.action_requests) {
             Intent intent = new Intent(this, RequestsActivity.class);
+            startActivity(intent);
+            return true;
+        } else if(id == R.id.action_friends) {
+            Intent intent = new Intent(this, FriendsActivity.class);
             startActivity(intent);
             return true;
         }
@@ -127,14 +132,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             JSONArray friends = new JSONArray(result.getHttpMessage());
             for(int i=0; i<friends.length(); i++){
                 JSONObject friend = friends.getJSONObject(i);
-                Double friendLat = friend.optDouble("gpsLat");
-                Double friendLong = friend.optDouble("gpsLong");
-                if(friendLat == null || friendLong == null) {
-                    System.out.println("No Location found");
+                if(friend.isNull("gpsLat") || friend.isNull("gpsLong")){
+                    System.out.println("Location not found");
                     continue;
                 }
-                LatLng friendLatLng = new LatLng(friendLat, friend.getDouble("gpsLong"));
-                mMap.addMarker(new MarkerOptions().position(friendLatLng).title(friend.getString("pid")));
+                double friendLat = friend.optDouble("gpsLat");
+                double friendLong = friend.optDouble("gpsLong");
+                LatLng friendLatLng = new LatLng(friendLat, friendLong);
+                mMap.addMarker(new MarkerOptions().position(friendLatLng)
+                        .title(friend.getString("pid"))
+                        .icon(friend.isNull("image") ? BitmapDescriptorFactory.defaultMarker()
+                                : BitmapDescriptorFactory.fromBitmap(
+                                        BitmapBase64Coder.decodeBase64(friend.optString("image")))));
             }
         } catch (JSONException e) {
             e.printStackTrace();
