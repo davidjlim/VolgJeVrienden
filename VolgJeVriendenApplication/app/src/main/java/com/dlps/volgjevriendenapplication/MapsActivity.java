@@ -115,8 +115,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             JSONArray friends = new JSONArray(result.getHttpMessage());
             for(int i=0; i<friends.length(); i++){
                 JSONObject friend = friends.getJSONObject(i);
-                Double friendLat = friend.getDouble("gpsLat");
-                Double friendLong = friend.getDouble("gpsLong");
+                Double friendLat = friend.optDouble("gpsLat");
+                Double friendLong = friend.optDouble("gpsLong");
                 if(friendLat == null || friendLong == null) {
                     System.out.println("No Location found");
                     continue;
