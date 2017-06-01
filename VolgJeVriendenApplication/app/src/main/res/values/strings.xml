@@ -24,7 +24,7 @@
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
-    <string name="pref_title_enable_following">Enable following and being followed</string>
+    <string name="pref_title_enable_following">Enable following</string>
 
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>
@@ -32,5 +32,9 @@
     <string name="button_photo">button_photo</string>
     <string name="title_activity_photo">Photo</string>
     <string name="add_image_url">addImage</string>
+    <string name="action_requests">Manage requests</string>
+    <string name="title_activity_requests">Requests</string>
+    <string name="get_friends_url">getFriends</string>
+    <string name="get_requests_url">getRequests</string>
 
 </resources>

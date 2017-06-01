@@ -45,11 +45,6 @@ public class MainActivity extends AppCompatActivity {
 
         DataHolder.getInstance().setContext(this);
 
-        LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        LocationUpdater locationUpdater = new LocationUpdater();
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,locationUpdater);
-        DataHolder.getInstance().setLocationUpdater(locationUpdater);
-
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setTitle("Log in");
         myToolbar.showOverflowMenu();
@@ -149,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
             if (HttpResult == HttpURLConnection.HTTP_OK) {
                 DataHolder.getInstance().setPassword(mPassword);
                 DataHolder.getInstance().setPhonenumber(mPhonenumber);
-                DataHolder.getInstance().getLocationUpdater().updateGPS();
+                DataHolder.getInstance().setLocationUpdater(new LocationUpdater());
                 startMap();
                 finish();
                 return;

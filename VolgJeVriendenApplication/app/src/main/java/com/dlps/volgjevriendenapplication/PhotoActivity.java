@@ -1,8 +1,14 @@
 package com.dlps.volgjevriendenapplication;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +16,14 @@ import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
+
+import static android.R.attr.rotation;
+import static android.graphics.Bitmap.createBitmap;
+import static java.lang.Thread.sleep;
 
 /**
  * Created by pim on 31-5-17.
@@ -21,9 +35,28 @@ public class PhotoActivity extends AppCompatActivity{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         System.out.println("From constructor: "+DataHolder.getInstance().getPhonenumber());
-        setContentView(R.layout.activity_photo);
+        //setContentView(R.layout.activity_photo);
+
+        if(savedInstanceState == null) {
+            dispatchTakePictureIntent();
+        }
+        else {
+            DataHolder.getInstance().setContext(this);
+            DataHolder.getInstance().setLocationUpdater(new LocationUpdater());
+            DataHolder.getInstance().setPassword(savedInstanceState.getString("password"));
+            DataHolder.getInstance().setPhonenumber(savedInstanceState.getString("pid"));
+        }
+
         super.onCreate(savedInstanceState);
-        dispatchTakePictureIntent();
+
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString("pid", DataHolder.getInstance().getPhonenumber());
+        outState.putString("password", DataHolder.getInstance().getPassword());
+
+        super.onSaveInstanceState(outState);
     }
 
     private void dispatchTakePictureIntent() {
@@ -41,7 +74,11 @@ public class PhotoActivity extends AppCompatActivity{
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
-            System.out.println("Hello World!");
+            if(android.os.Build.MANUFACTURER.equals("LGE")) {
+                Matrix matrix = new Matrix();
+                matrix.postRotate(90);
+                imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), matrix, true);
+            }
 
             final JSONObject json = new JSONObject();
             try{
@@ -49,7 +86,7 @@ public class PhotoActivity extends AppCompatActivity{
                 System.out.println(DataHolder.getInstance().getLocationUpdater());
                 json.put("pid", DataHolder.getInstance().getPhonenumber());
                 json.put("password", DataHolder.getInstance().getPassword());
-                json.put("image", "hoi");//BitmapBase64Coder.encodeTobase64(imageBitmap));
+                json.put("image", BitmapBase64Coder.encodeTobase64(imageBitmap));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -67,4 +104,27 @@ public class PhotoActivity extends AppCompatActivity{
             Toast.makeText(this, "Photo failed", Toast.LENGTH_SHORT).show();
         }
     }
+
+    /*private Bitmap rotateIfRequired(Uri ) {
+        ExifInterface exif = null;
+        try {
+            exif = new ExifInterface(uri.getPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+        int rotationInDegrees = exifToDegrees(rotation);
+
+        Matrix matrix = new Matrix();
+        if (rotation != 0f) {matrix.preRotate(rotationInDegrees);}
+
+        return createBitmap(bitmap , 0, 0, bitmap .getWidth(), bitmap .getHeight(), matrix, true);
+    }
+
+    private static int exifToDegrees(int exifOrientation) {
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90) { return 90; }
+        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180) {  return 180; }
+        else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270) {  return 270; }
+        return 0;
+    }*/
 }

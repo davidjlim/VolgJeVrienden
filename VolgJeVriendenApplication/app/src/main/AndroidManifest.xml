@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -44,15 +45,17 @@
             android:label="@string/title_activity_maps" />
         <activity
             android:name=".SettingsActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
             android:label="@string/title_activity_settings"></activity>
         <activity
             android:name=".PhotoActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="portrait"
             android:label="@string/title_activity_photo"></activity>
+        <activity
+            android:name=".RequestsActivity"
+            android:label="@string/title_activity_requests"></activity>
     </application>
 
 </manifest>
     <!--android:screenOrientation="portrait"-->
+<!--
+    android:configChanges="orientation|keyboardHidden|screenSize"
+    android:screenOrientation="portrait"-->
