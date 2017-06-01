@@ -4,7 +4,7 @@
     <string name="phone_number_hint">Enter your phone number</string>
     <string name="password_hint">Enter your password</string>
     <string name="error_incorrect_password">Incorrect password</string>
-    <string name="ip_address">http://145.118.85.55:9000/</string>
+    <string name="ip_address">http://192.168.178.18:9000/</string>
     <string name="signup_url">signup</string>
     <string name="title_activity_maps">Map</string>
     <string name="action_sign_up">Sign up</string>

@@ -5,24 +5,42 @@ import android.app.ListActivity;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 
-public class RequestsActivity extends ListActivity {
-    String[] listItems = {"exploring", "android",
-            "list", "activities"};
+public class RequestsActivity extends AppCompatActivity {
+    JSONArray requests;
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_requests);
+
+        android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
+        Window window = getWindow();
+        window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
 
         final String url = getString(R.string.ip_address) + getString(R.string.get_requests_url);
         System.out.println(url);
@@ -47,6 +65,13 @@ public class RequestsActivity extends ListActivity {
                 }
                 System.out.println(httpResultMessage.getHttpMessage());
 
+                requests = null;
+                try {
+                    requests = new JSONArray(httpResultMessage.getHttpMessage());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
                 runOnUiThread(new Runnable() {
                     public void run() {
                         drawElements();
@@ -67,8 +92,15 @@ public class RequestsActivity extends ListActivity {
 
     public void drawElements(){
         ArrayList<String> list = new ArrayList<String>();
-        list.add("item1");
-        list.add("item2");
+        for(int i=0; i<requests.length(); i++){
+            try {
+                JSONObject request = requests.getJSONObject(i);
+                list.add(request.getString("pid"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
 
         //instantiate custom adapter
         RequestListAdapter adapter = new RequestListAdapter(list, RequestsActivity.this);
@@ -76,5 +108,16 @@ public class RequestsActivity extends ListActivity {
         //handle listview and assign adapter
         ListView lView = (ListView)findViewById(android.R.id.list);
         lView.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
