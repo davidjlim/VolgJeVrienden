@@ -26,4 +26,4 @@ POST    /getFriends                 controllers.DatabaseController.getFriends
 
 POST    /addImage                   controllers.DatabaseController.addImage
 
-POST    /getOwnImage                   controllers.DatabaseController.getOwnImage
+POST    /getOwnImage                controllers.DatabaseController.getOwnImage

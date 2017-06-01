@@ -19,12 +19,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private static final long TIME_BETWEEN_REFRESH = 1000;
+    private static final long TIME_BETWEEN_REFRESH = 10000;
     private GoogleMap mMap;
     private Boolean locationUnknown = false;
     Marker ownMarker;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +101,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void drawScreen(){
         mMap.clear();
         Location currentLocation = DataHolder.getInstance().getLocationUpdater().getLastKnownLocation();
+        JSONObject login = new JSONObject();
+        try {
+            login.put("pid", DataHolder.getInstance().getPhonenumber());
+            login.put("password", DataHolder.getInstance().getPassword());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        HttpResultMessage result = ServerConnector.postRequest(getString(R.string.ip_address)
+                        + getString(R.string.getFriends_url), login);
+        System.out.println(result.getHttpMessage());
+        try {
+            JSONArray friends = new JSONArray(result.getHttpMessage());
+            for(int i=0; i<friends.length(); i++){
+                JSONObject friend = friends.getJSONObject(i);
+                Double friendLat = friend.getDouble("gpsLat");
+                Double friendLong = friend.getDouble("gpsLong");
+                if(friendLat == null || friendLong == null) {
+                    System.out.println("No Location found");
+                    continue;
+                }
+                LatLng friendLatLng = new LatLng(friendLat, friend.getDouble("gpsLong"));
+                mMap.addMarker(new MarkerOptions().position(friendLatLng).title(friend.getString("pid")));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         if(currentLocation != null) {
             locationUnknown = false;
             LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
