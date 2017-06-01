@@ -9,8 +9,8 @@
     <string name="title_activity_maps">Map</string>
     <string name="action_sign_up">Sign up</string>
     <string name="signin_url">signin</string>
-    <string name="updateGPS_url">updateGPS</string>
-    <string name="getFriends_url">getFriends</string>
+    <string name="update_GPS_url">updateGPS</string>
+    <string name="get_friends_url">getFriends</string>
     <string name="no_connection">The internet connection failed</string>
     <string name="user_not_found">User does not exist</string>
     <string name="incorrect_password">Incorrect password</string>
@@ -19,14 +19,8 @@
     <string name="location_unknown">Your location isn\'t known</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
-
-    <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
     <string name="pref_header_general">General</string>
-
     <string name="pref_title_enable_following">Enable following</string>
-
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>
     <string name="change_photo">Change photo</string>
@@ -34,8 +28,9 @@
     <string name="title_activity_photo">Photo</string>
     <string name="add_image_url">addImage</string>
     <string name="action_requests">Manage requests</string>
+    <string name="action_friends">Friend List</string>
     <string name="title_activity_requests">Requests</string>
-    <string name="get_friends_url">getFriends</string>
+    <string name="title_activity_friends">Friends</string>
     <string name="get_requests_url">getRequests</string>
 
 </resources>

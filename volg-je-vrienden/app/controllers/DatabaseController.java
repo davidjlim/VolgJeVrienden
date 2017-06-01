@@ -309,6 +309,37 @@ public class DatabaseController extends Controller {
         return ok(result);
     }
 
+    public Result removeFriend(){
+        if(conn == null)
+            conn = connect();
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String pid2 = jsonNode.findPath("pid2").asText();
+        String password = jsonNode.findPath("password").asText();
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+
+        String sql = "DELETE FROM ISFRIENDSWITH WHERE (PID1=? AND PID2=?) OR (PID1=? AND PID2=?)";
+        PreparedStatement pstmt = null;
+        try {pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, pid);
+            pstmt.setString(2, pid2);
+            pstmt.setString(3, pid2);
+            pstmt.setString(4, pid);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+        }
+        return ok("Het ging hopelijk goed! (removeFriend)");
+    }
+
     public Result addImage() throws SQLException {
         if(conn == null)
             conn = connect();

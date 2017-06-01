@@ -18,5 +18,9 @@
         android:title="@string/action_requests"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/action_friends"
+        android:title="@string/action_friends"
+        app:showAsAction="never"/>
+
 
 </menu>

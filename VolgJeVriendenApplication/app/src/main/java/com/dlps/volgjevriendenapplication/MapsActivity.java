@@ -2,6 +2,7 @@ package com.dlps.volgjevriendenapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Bundle;
@@ -18,6 +19,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -25,6 +28,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.sql.SQLOutput;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -70,6 +75,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         } else if(id == R.id.action_requests) {
             Intent intent = new Intent(this, RequestsActivity.class);
+            startActivity(intent);
+            return true;
+        } else if(id == R.id.action_friends) {
+            Intent intent = new Intent(this, FriendsActivity.class);
             startActivity(intent);
             return true;
         }
@@ -121,20 +130,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             e.printStackTrace();
         }
         HttpResultMessage result = ServerConnector.postRequest(getString(R.string.ip_address)
-                        + getString(R.string.getFriends_url), login);
+                        + getString(R.string.get_friends_url), login);
         System.out.println(result.getHttpMessage());
         try {
             JSONArray friends = new JSONArray(result.getHttpMessage());
             for(int i=0; i<friends.length(); i++){
                 JSONObject friend = friends.getJSONObject(i);
-                Double friendLat = friend.optDouble("gpsLat");
-                Double friendLong = friend.optDouble("gpsLong");
-                if(friendLat == null || friendLong == null) {
-                    System.out.println("No Location found");
+                if(friend.isNull("gpsLat") || friend.isNull("gpsLong")){
+                    System.out.println("Location not found");
                     continue;
                 }
-                LatLng friendLatLng = new LatLng(friendLat, friend.getDouble("gpsLong"));
-                mMap.addMarker(new MarkerOptions().position(friendLatLng).title(friend.getString("pid")));
+                double friendLat = friend.optDouble("gpsLat");
+                double friendLong = friend.optDouble("gpsLong");
+                LatLng friendLatLng = new LatLng(friendLat, friendLong);
+                mMap.addMarker(new MarkerOptions().position(friendLatLng)
+                        .title(friend.getString("pid"))
+                        .icon(friend.isNull("image") ? BitmapDescriptorFactory.defaultMarker() :
+                            BitmapDescriptorFactory.fromBitmap(
+                                BitmapBase64Coder.decodeBase64(friend.optString("image")))));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -142,7 +155,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(currentLocation != null) {
             locationUnknown = false;
             LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            ownMarker = mMap.addMarker(new MarkerOptions().position(currentLatLng).title("This is you!"));
+            ownMarker = mMap.addMarker(new MarkerOptions().position(currentLatLng)
+                    .title("This is you!")
+                    .zIndex(1.0f));
         }
         else {
             errorLocation();

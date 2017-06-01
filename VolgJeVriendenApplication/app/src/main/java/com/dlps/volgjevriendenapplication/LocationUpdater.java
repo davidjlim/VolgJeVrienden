@@ -70,7 +70,7 @@ public class LocationUpdater implements android.location.LocationListener {
         System.out.println("still updating...");
 
         String url = DataHolder.getInstance().getContext().getResources().getString(R.string.ip_address) +
-                DataHolder.getInstance().getContext().getResources().getString(R.string.updateGPS_url);
+                DataHolder.getInstance().getContext().getResources().getString(R.string.update_GPS_url);
         System.out.println(url);
         JSONObject json = new JSONObject();
         try {

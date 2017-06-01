@@ -52,6 +52,9 @@
         <activity
             android:name=".RequestsActivity"
             android:label="@string/title_activity_requests"></activity>
+        <activity
+            android:name=".FriendsActivity"
+            android:label="@string/title_activity_friends"></activity>
     </application>
 
 </manifest>
