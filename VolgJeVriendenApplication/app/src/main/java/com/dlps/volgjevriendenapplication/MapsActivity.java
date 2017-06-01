@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -30,14 +32,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.sql.SQLOutput;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final long TIME_BETWEEN_REFRESH = 10000;
     private GoogleMap mMap;
     private Boolean locationUnknown = false;
-    Marker ownMarker;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,40 +102,73 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         final Handler handler = new Handler();
         final Runnable myRunnable = new Runnable(){
+            Boolean zoomIn = true;
             @Override
             public void run() {
-                drawScreen();
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        findFriends(zoomIn);
+                        zoomIn = false;
+                        return null;
+                    }
+                }.execute();
                 handler.postDelayed(this, TIME_BETWEEN_REFRESH);
             }
         };
         handler.postDelayed(myRunnable, 0);
 
+        if(DataHolder.getInstance().getLocationUpdater() == null)
+            DataHolder.getInstance().setLocationUpdater(new LocationUpdater());
         Location currentLocation = DataHolder.getInstance().getLocationUpdater().getLastKnownLocation();
         if(currentLocation != null) {
             locationUnknown = false;
-            LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
         }
         else{
             errorLocation();
         }
     }
 
-    public void drawScreen(){
-        mMap.clear();
-        Location currentLocation = DataHolder.getInstance().getLocationUpdater().getLastKnownLocation();
-        JSONObject login = new JSONObject();
+    @Override
+    protected void onResume() {
+        super.onResume();
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                findFriends(true);
+                return null;
+            }
+        }.execute();
+    }
+
+    public void findFriends(final Boolean zoomIn){
+        final JSONObject login = new JSONObject();
         try {
             login.put("pid", DataHolder.getInstance().getPhonenumber());
             login.put("password", DataHolder.getInstance().getPassword());
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        HttpResultMessage result = ServerConnector.postRequest(getString(R.string.ip_address)
-                        + getString(R.string.get_friends_url), login);
-        System.out.println(result.getHttpMessage());
+
+        final HttpResultMessage result = ServerConnector.postRequest(getString(R.string.ip_address)
+                + getString(R.string.get_friends_url), login);
+
+        runOnUiThread(new Runnable() {
+            public void run() {
+                try {
+                    drawScreen(new JSONArray(result.getHttpMessage()), zoomIn);
+                } catch (JSONException e) {
+                    Toast.makeText(DataHolder.getInstance().getContext(), getString(R.string.no_connection), Toast.LENGTH_SHORT);
+                }
+            }
+        });
+    }
+
+    private void drawScreen(JSONArray friends, Boolean zoomIn){
+        mMap.clear();
+        Collection<Marker> markers = new ArrayList<>();
+
         try {
-            JSONArray friends = new JSONArray(result.getHttpMessage());
             for(int i=0; i<friends.length(); i++){
                 JSONObject friend = friends.getJSONObject(i);
                 if(friend.isNull("gpsLat") || friend.isNull("gpsLong")){
@@ -143,24 +178,36 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 double friendLat = friend.optDouble("gpsLat");
                 double friendLong = friend.optDouble("gpsLong");
                 LatLng friendLatLng = new LatLng(friendLat, friendLong);
-                mMap.addMarker(new MarkerOptions().position(friendLatLng)
+                Marker marker = mMap.addMarker(new MarkerOptions().position(friendLatLng)
                         .title(friend.getString("pid"))
                         .icon(friend.isNull("image") ? BitmapDescriptorFactory.defaultMarker() :
-                            BitmapDescriptorFactory.fromBitmap(
-                                BitmapBase64Coder.decodeBase64(friend.optString("image")))));
+                                BitmapDescriptorFactory.fromBitmap(
+                                        BitmapBase64Coder.decodeBase64(friend.optString("image")))));
+                markers.add(marker);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Location currentLocation = DataHolder.getInstance().getLocationUpdater().getLastKnownLocation();
         if(currentLocation != null) {
             locationUnknown = false;
             LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            ownMarker = mMap.addMarker(new MarkerOptions().position(currentLatLng)
+            Marker marker = mMap.addMarker(new MarkerOptions().position(currentLatLng)
                     .title("This is you!")
                     .zIndex(1.0f));
+            markers.add(marker);
         }
         else {
             errorLocation();
+        }
+
+        if(zoomIn) {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            for (Marker marker : markers) {
+                builder.include(marker.getPosition());
+            }
+            LatLngBounds bounds = builder.build();
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 200));
         }
     }
 

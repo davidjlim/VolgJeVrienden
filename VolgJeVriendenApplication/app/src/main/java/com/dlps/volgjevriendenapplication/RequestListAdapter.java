@@ -1,6 +1,7 @@
 package com.dlps.volgjevriendenapplication;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,9 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -57,7 +61,24 @@ public class RequestListAdapter extends BaseAdapter implements ListAdapter {
         acceptBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                System.out.println("Button " + position + " pressed!");
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        String url = DataHolder.getInstance().getContext().getString(R.string.ip_address) +
+                                DataHolder.getInstance().getContext().getString(R.string.add_friend_url);
+                        JSONObject json = new JSONObject();
+                        try{
+                            json.put("pid",DataHolder.getInstance().getPhonenumber());
+                            json.put("password", DataHolder.getInstance().getPassword());
+                            json.put("pid2", list.get(position));
+                            list.remove(position);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        ServerConnector.postRequest(url,json);
+                        return null;
+                    }
+                }.execute();
                 notifyDataSetChanged();
             }
         });

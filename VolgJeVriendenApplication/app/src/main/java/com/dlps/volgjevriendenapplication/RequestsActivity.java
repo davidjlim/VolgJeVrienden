@@ -2,15 +2,21 @@ package com.dlps.volgjevriendenapplication;
 
 
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -82,6 +88,13 @@ public class RequestsActivity extends AppCompatActivity {
         }.execute();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.requests_menu, menu);
+        return true;
+    }
+
     private void errorInternet() {
         runOnUiThread(new Runnable() {
             public void run() {
@@ -116,8 +129,34 @@ public class RequestsActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.action_add:
+                addRequest();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void addRequest() {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+// ...Irrelevant code for customizing the buttons and title
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.alert_request_editor, null);
+        dialogBuilder.setView(dialogView);
+
+        final EditText editText = (EditText) dialogView.findViewById(R.id.phonenumber);
+        editText.setHint("Enter the phonenumber");
+
+        // set dialog message
+        dialogBuilder.setCancelable(false).setPositiveButton("Send", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                System.out.println("The edit text is " + editText.getText());
+            }
+        });
+
+        // create alert dialog
+        AlertDialog alertDialog = dialogBuilder.create();
+        // show it
+        alertDialog.show();
     }
 }

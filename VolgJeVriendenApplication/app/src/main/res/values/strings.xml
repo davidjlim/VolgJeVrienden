@@ -32,5 +32,7 @@
     <string name="title_activity_requests">Requests</string>
     <string name="title_activity_friends">Friends</string>
     <string name="get_requests_url">getRequests</string>
+    <string name="add_friend_url">addFriend</string>
+    <string name="request_phone_number_hint">Enter the phonenumber</string>
 
 </resources>
