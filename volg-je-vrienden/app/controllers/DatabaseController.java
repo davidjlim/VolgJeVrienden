@@ -272,7 +272,8 @@ public class DatabaseController extends Controller {
                 "FROM ((SELECT PID1 AS PID FROM ISFRIENDSWITH WHERE PID2 = ? " +
                 "UNION SELECT PID2 AS PID FROM ISFRIENDSWITH WHERE PID1 = ?) AS P) " +
                 "INNER JOIN USERS U " +
-                "ON U.PID = P.PID";
+                "ON U.PID = P.PID " +
+                "WHERE U.VISIBILITY = 1";
         PreparedStatement pstmt = null;
         try {
             pstmt = conn.prepareStatement(sql);
