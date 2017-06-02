@@ -2,36 +2,32 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# An example controller showing a sample home page
-GET     /                           controllers.HomeController.index
 # An example controller showing how to use dependency injection
 GET     /count                      controllers.CountController.count
-# An example controller showing how to write asynchronous code
-GET     /message                    controllers.AsyncController.message
 
-# Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-POST    /signin                     controllers.DatabaseController.signin
+POST    /signin                     controllers.UsersController.signin
 
-POST    /signup                     controllers.DatabaseController.signup
+POST    /signup                     controllers.UsersController.signup
 
-POST    /updateGPS                  controllers.DatabaseController.updateGPS
+POST    /updateGPS                  controllers.UsersController.updateGPS
 
-POST    /makeRequest                controllers.DatabaseController.makeRequest
+POST    /addImage                   controllers.UsersController.addImage
 
-POST    /getRequests                controllers.DatabaseController.getRequests
+POST    /getOwnImage                controllers.UsersController.getOwnImage
 
-POST    /getFriends                 controllers.DatabaseController.getFriends
+POST    /getVisibility              controllers.UsersController.getVisibility
 
-POST    /addImage                   controllers.DatabaseController.addImage
+POST    /setVisibility              controllers.UsersController.setVisibility
 
-POST    /getOwnImage                controllers.DatabaseController.getOwnImage
 
-POST    /addFriend                  controllers.DatabaseController.addFriend
+POST    /makeRequest                controllers.RequestsController.makeRequest
 
-POST    /removeFriend               controllers.DatabaseController.removeFriend
+POST    /getRequests                controllers.RequestsController.getRequests
 
-POST    /getVisibility              controllers.DatabaseController.getVisibility
 
-POST    /setVisibility              controllers.DatabaseController.setVisibility
+POST    /addFriend                  controllers.FriendsController.addFriend
+
+POST    /removeFriend               controllers.FriendsController.removeFriend
+
+POST    /getFriends                 controllers.FriendsController.getFriends
