@@ -31,3 +31,7 @@ POST    /getOwnImage                controllers.DatabaseController.getOwnImage
 POST    /addFriend                  controllers.DatabaseController.addFriend
 
 POST    /removeFriend               controllers.DatabaseController.removeFriend
+
+POST    /getVisibility              controllers.DatabaseController.getVisibility
+
+POST    /setVisibility              controllers.DatabaseController.setVisibility

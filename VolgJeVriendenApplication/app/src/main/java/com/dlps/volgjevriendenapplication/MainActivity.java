@@ -29,11 +29,16 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText mPhonenumberView;
     private EditText mPasswordView;
-    private View mProgressView;
-    private View mLoginFormView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            finish();
+            return;
+        }
+
+        reset();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -42,8 +47,6 @@ public class MainActivity extends AppCompatActivity {
 
         mPhonenumberView = (EditText) findViewById(R.id.phonenumber);
         mPasswordView = (EditText) findViewById(R.id.password);
-
-        DataHolder.getInstance().setContext(this);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         myToolbar.setTitle("Log in");
@@ -107,6 +110,13 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    private void reset() {
+        DataHolder.getInstance().setContext(this);
+        DataHolder.getInstance().setPassword(null);
+        DataHolder.getInstance().setPhonenumber(null);
+        DataHolder.getInstance().setLocationUpdater(null);
+    }
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -142,11 +152,13 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(final Integer HttpResult) {
             mAuthTask = null;
             if (HttpResult == HttpURLConnection.HTTP_OK) {
+                mPhonenumberView.setText("");
+                mPasswordView.setText("");
+
                 DataHolder.getInstance().setPassword(mPassword);
                 DataHolder.getInstance().setPhonenumber(mPhonenumber);
                 DataHolder.getInstance().setLocationUpdater(new LocationUpdater());
                 startMap();
-                finish();
                 return;
             }
 

@@ -6,8 +6,10 @@
     <SwitchPreference
         android:layout_marginTop="-20dp"
         android:defaultValue="true"
-        android:key="switch_following"
-        android:title="@string/pref_title_enable_following" />
+        android:key="switch_visibility"
+        android:title="@string/pref_title_set_visibility"
+        android:summary="@string/pref_summary_visibility"
+        />
 
     <Preference android:title="@string/change_photo"
         android:key="@string/button_photo"/>

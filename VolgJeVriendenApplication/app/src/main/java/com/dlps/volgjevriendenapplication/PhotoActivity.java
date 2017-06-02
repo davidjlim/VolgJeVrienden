@@ -47,6 +47,11 @@ public class PhotoActivity extends AppCompatActivity{
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            finish();
+            return;
+        }
+
         System.out.println("From constructor: "+DataHolder.getInstance().getPhonenumber());
         //setContentView(R.layout.activity_photo);
 
@@ -114,7 +119,7 @@ public class PhotoActivity extends AppCompatActivity{
 
     /**
      * This method is responsible for solving the rotation issue if exist. Also scale the images to
-     * 64x64 resolution
+     * 128x128 resolution
      *
      * @param context       The current context
      * @param selectedImage The Image URI
@@ -236,7 +241,7 @@ public class PhotoActivity extends AppCompatActivity{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        imageBitmap = getCroppedBitmap(makeSquare(imageBitmap));
+        imageBitmap = getCroppedBitmap(imageBitmap);
 
         final JSONObject json = new JSONObject();
         try{
@@ -274,15 +279,6 @@ public class PhotoActivity extends AppCompatActivity{
         else{
             Toast.makeText(this, "Photo failed", Toast.LENGTH_SHORT).show();
         }*/
-    }
-
-    public static Bitmap makeSquare(Bitmap bitmap) {
-        int desWidth;
-        int desHeight;
-        desWidth = bitmap.getWidth();
-        desHeight = desWidth;
-        Bitmap croppedBitmap = Bitmap.createBitmap(bitmap, 0,bitmap.getHeight() / 2 - bitmap.getWidth() / 2,desWidth, desHeight);
-        return croppedBitmap;
     }
 
     public Bitmap getCroppedBitmap(Bitmap bitmap) {

@@ -372,7 +372,7 @@ public class DatabaseController extends Controller {
                     e.printStackTrace();
                 }
         }
-        return ok("Het ging hopelijk goed! (addImage)");
+        return ok();
     }
 
     public Result getOwnImage(){
@@ -384,7 +384,6 @@ public class DatabaseController extends Controller {
         if(!checkValidUser(pid, password))
             return unauthorized();
 
-        ArrayNode result = Json.newArray();
         String sql = "SELECT IMAGE FROM USERS WHERE PID = ?";
         PreparedStatement pstmt = null;
         try {
@@ -394,8 +393,8 @@ public class DatabaseController extends Controller {
             while (rs.next()) {
                 ObjectNode request = Json.newObject();
                 request.put("image", rs.getString("IMAGE"));
-                System.out.println(request);
-                result.add(request);
+                pstmt.close();
+                return ok(request);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -407,8 +406,70 @@ public class DatabaseController extends Controller {
                     e.printStackTrace();
                 }
         }
-        System.out.println(result);
-        return ok(result);
+        return internalServerError();
+    }
+
+    public Result setVisibility(){
+        if(conn == null)
+            conn = connect();
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String password = jsonNode.findPath("password").asText();
+        Boolean visibility = jsonNode.findPath("visibility").asBoolean();
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+
+        String sql = "UPDATE USERS SET VISIBILITY=? WHERE PID=?";
+        PreparedStatement pstmt = null;
+        try {pstmt = conn.prepareStatement(sql);
+            pstmt.setBoolean(1, visibility);
+            pstmt.setString(2, pid);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            return internalServerError();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    return internalServerError();
+                }
+        }
+        return ok();
+    }
+
+    public Result getVisibility(){
+        if(conn == null)
+            conn = connect();
+        JsonNode jsonNode = Controller.request().body().asJson();
+        String pid = jsonNode.findPath("pid").asText();
+        String password = jsonNode.findPath("password").asText();
+        if(!checkValidUser(pid, password))
+            return unauthorized();
+
+        String sql = "SELECT VISIBILITY FROM USERS WHERE PID = ?";
+        PreparedStatement pstmt = null;
+        try {
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, pid);
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                ObjectNode request = Json.newObject();
+                request.put("visibility", rs.getInt("VISIBILITY"));
+                pstmt.close();
+                return ok(request);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if(pstmt != null)
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+        }
+        return internalServerError();
     }
 
     protected Connection connect() {

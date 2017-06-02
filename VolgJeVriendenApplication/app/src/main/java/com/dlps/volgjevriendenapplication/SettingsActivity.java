@@ -2,18 +2,35 @@ package com.dlps.volgjevriendenapplication;
 
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.HttpURLConnection;
 
 public class SettingsActivity extends AppCompatActivity {
+    static Preference switchVisibility;
+    static Boolean visibility = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            finish();
+            return;
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.pref_with_actionbar);
 
@@ -30,6 +47,14 @@ public class SettingsActivity extends AppCompatActivity {
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+    }
+
+    public void setVisibility(Boolean visibility) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = prefs.edit();
+        System.out.println("Setting to: " + !visibility);
+        editor.putBoolean("switch_visibility", (!visibility));
+        editor.apply();
     }
 
     public static class MyPreferenceFragment extends PreferenceFragment{
@@ -49,6 +74,32 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 }
             });
+
+            switchVisibility = findPreference("switch_visibility");
+            switchVisibility.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                   @Override
+                   public boolean onPreferenceChange(Preference preference, Object newValue) {
+                       final Boolean visibility = (Boolean) newValue;
+                       new AsyncTask<Void, Void, Void>() {
+                           @Override
+                           protected Void doInBackground(Void... params) {
+                               String url = getString(R.string.ip_address) + getString(R.string.set_visibility_url);
+                               JSONObject json = new JSONObject();
+                               try {
+                                   json.put("pid", DataHolder.getInstance().getPhonenumber());
+                                   json.put("password",DataHolder.getInstance().getPassword());
+                                   json.put("visibility", visibility);
+                               } catch (JSONException e) {
+                                   e.printStackTrace();
+                               }
+                               ServerConnector.postRequest(url,json);
+                               return null;
+                           }
+                       }.execute();
+                       return true;
+                   }
+               }
+            );
         }
     }
 
