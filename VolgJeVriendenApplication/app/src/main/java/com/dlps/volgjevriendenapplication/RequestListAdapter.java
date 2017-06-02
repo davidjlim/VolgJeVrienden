@@ -16,33 +16,66 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 /**
+ * For correctly displaying the items in list
  * Created by pim on 1-6-17.
  */
 
 public class RequestListAdapter extends BaseAdapter implements ListAdapter {
+    /**
+     * List of entries
+     */
     private ArrayList<String> list = new ArrayList<String>();
+    /**
+     * The context of the RequestsActivity
+     */
     private Context context;
 
+    /**
+     * Constructor
+     * @param list the list of requests
+     * @param context the context of the requestactivity
+     */
     public RequestListAdapter(ArrayList<String> list, Context context) {
         this.list = list;
         this.context = context;
     }
 
+    /**
+     * Gets the number of items in the list
+     * @return the number of items in the list
+     */
     @Override
     public int getCount() {
         return list.size();
     }
 
+    /**
+     * Gets the item at position pos
+     * @param pos the requested entry in the list
+     * @return the item at position pos
+     */
     @Override
     public Object getItem(int pos) {
         return list.get(pos);
     }
 
+    /**
+     * Unused interface method
+     * @param pos
+     * @return
+     */
     @Override
     public long getItemId(int pos) {
         return 0;
     }
 
+    /**
+     * gets the view of the list
+     * @param position
+     * @param convertView
+     * @param parent
+     * @return
+     */
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         View view = convertView;

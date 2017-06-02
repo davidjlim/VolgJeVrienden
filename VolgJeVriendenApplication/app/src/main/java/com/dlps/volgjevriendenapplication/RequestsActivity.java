@@ -31,7 +31,14 @@ import org.json.JSONObject;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 
+/**
+ * The request activity displays a list of all requests that other users have sent them and
+ * allows the user to make their own
+ */
 public class RequestsActivity extends AppCompatActivity {
+    /**
+     * The JSONArray with all requests to the user
+     */
     JSONArray requests;
     /** Called when the activity is first created. */
     @Override
@@ -94,6 +101,11 @@ public class RequestsActivity extends AppCompatActivity {
         }.execute();
     }
 
+    /**
+     * Creates the options at the top of the screen
+     * @param menu
+     * @return
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -101,6 +113,9 @@ public class RequestsActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * When a connectionerror has occurred
+     */
     private void errorInternet() {
         runOnUiThread(new Runnable() {
             public void run() {
@@ -109,6 +124,9 @@ public class RequestsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Draws all the entries in the list
+     */
     public void drawElements(){
         ArrayList<String> list = new ArrayList<>();
         for(int i=0; i<requests.length(); i++){
@@ -129,6 +147,11 @@ public class RequestsActivity extends AppCompatActivity {
         lView.setAdapter(adapter);
     }
 
+    /**
+     * Responds to the selected item
+     * @param item the selected item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -143,6 +166,9 @@ public class RequestsActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * For making a request
+     */
     private void addRequest() {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
 // ...Irrelevant code for customizing the buttons and title

@@ -37,12 +37,29 @@ import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ * The Maps Activity, shows the world's map with markers marking
+ * the user's and their friends' locations
+ */
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
-
+    /**
+     * The time between screen refreshes
+     */
     private static final long TIME_BETWEEN_REFRESH = 10000;
+    /**
+     * The google map
+     */
     private GoogleMap mMap;
+    /**
+     * Whether the user's location isn't known, used so that the location unknown message is
+     * displayed only once
+     */
     private Boolean locationUnknown = false;
 
+    /**
+     * When the maps activity is created, creates the screen etc.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
@@ -71,12 +88,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setCurrentVisibility();
     }
 
+    /**
+     * Creates the dropdown options menu
+     * @param menu
+     * @return true if displayed else false
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.dashboard, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
+    /**
+     * Responds when a menu item is selected
+     * @param item the selected item
+     * @return true if displayed else false
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -143,6 +170,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    /**
+     * Resumes the activity
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -155,6 +185,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }.execute();
     }
 
+    /**
+     * Gets the locations of all visible friends and calls for drawScreen
+     * @param zoomIn whether zooming in so all are visible is wanted
+     */
     public void findFriends(final Boolean zoomIn){
         final JSONObject login = new JSONObject();
         try {
@@ -178,6 +212,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    /**
+     * Draws all markers, that of visible friends and self
+     * @param friends a JSONArray with the pid and gps coordinates of all visible friends
+     * @param zoomIn whether zooming in so all are visible is wanted
+     */
     private void drawScreen(JSONArray friends, Boolean zoomIn){
         mMap.clear();
         Collection<Marker> markers = new ArrayList<>();
@@ -225,6 +264,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    /**
+     * In case the users location isn't known
+     */
     private void errorLocation() {
         if(locationUnknown)
             return;
@@ -237,6 +279,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         toast.show();
     }
 
+    /**
+     * Sets the visibility setting switch to the state corresponding with the current value
+     */
     private void setCurrentVisibility() {
         new AsyncTask<Void, Void, Void>() {
             @Override

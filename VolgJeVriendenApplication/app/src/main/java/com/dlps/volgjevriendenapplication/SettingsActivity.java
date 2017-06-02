@@ -20,10 +20,17 @@ import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
 
+/**
+ * The Settings Activity, displays a menu so the user can choose to change his visibility or his photo
+ */
 public class SettingsActivity extends AppCompatActivity {
     static Preference switchVisibility;
     static Boolean visibility = null;
 
+    /**
+     * When the activity is created
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {

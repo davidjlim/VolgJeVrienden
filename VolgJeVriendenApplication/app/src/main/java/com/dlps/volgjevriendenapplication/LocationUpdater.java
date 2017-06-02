@@ -11,24 +11,23 @@ import org.json.JSONObject;
 import java.util.List;
 
 /**
+ * Updates the user's location
  * Created by pim on 30-5-17.
  */
 
 public class LocationUpdater implements android.location.LocationListener {
-    private static final long MIN_TIME_BW_UPDATES = 0;
-    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 0;
-
-    public Location getCurrentLocation() {
-        return currentLocation;
-    }
-
-    public void setCurrentLocation(Location currentLocation) {
-        this.currentLocation = currentLocation;
-    }
-
+    /**
+     * The user's current location
+     */
     private Location currentLocation;
+    /**
+     * The locationmanager, communicates with the phone's location sensors
+     */
     private LocationManager mLocationManager;
 
+    /**
+     * Constructor
+     */
     public LocationUpdater() {
         LocationManager locationManager = (LocationManager)DataHolder.getInstance().getContext().getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,this);
@@ -36,6 +35,10 @@ public class LocationUpdater implements android.location.LocationListener {
         updateGPS();
     }
 
+    /**
+     * To get the user's last known location
+     * @return the user's last known location
+     */
     public Location getLastKnownLocation() {
         mLocationManager = (LocationManager)DataHolder.getInstance().getContext()
                 .getSystemService(DataHolder.getInstance().getContext().LOCATION_SERVICE);
@@ -54,12 +57,19 @@ public class LocationUpdater implements android.location.LocationListener {
         return bestLocation;
     }
 
+    /**
+     * When the location changes
+     * @param location new location
+     */
     @Override
     public void onLocationChanged(Location location) {
         currentLocation = location;
         updateGPS();
     }
 
+    /**
+     * Sends the new GPS coordinates to the server
+     */
     public void updateGPS(){
         if(DataHolder.getInstance().getPhonenumber() == null)
             return;
@@ -85,16 +95,30 @@ public class LocationUpdater implements android.location.LocationListener {
         ServerConnector.postRequest(url, json);
     }
 
+    /**
+     * Unused interface method
+     * @param provider
+     * @param status
+     * @param extras
+     */
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
 
     }
 
+    /**
+     * Unused interface method
+     * @param provider
+     */
     @Override
     public void onProviderEnabled(String provider) {
 
     }
 
+    /**
+     * Unused interface method
+     * @param provider
+     */
     @Override
     public void onProviderDisabled(String provider) {
 

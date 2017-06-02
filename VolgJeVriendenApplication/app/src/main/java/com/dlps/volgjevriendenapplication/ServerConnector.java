@@ -11,10 +11,14 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
+ * The ServerConnector has static methods with which the programmer can communicate with the server
  * Created by pim on 30-5-17.
  */
 
 public class ServerConnector {
+    /**
+     *
+     */
     public static final int HTTP_NO_CONNECTION = 0;
 
     public static HttpResultMessage postRequest(String url, JSONObject json){
