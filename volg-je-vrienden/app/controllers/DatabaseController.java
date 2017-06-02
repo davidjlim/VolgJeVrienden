@@ -434,6 +434,11 @@ public class DatabaseController extends Controller {
             pstmt.setString(2, pid);
             pstmt.executeUpdate();
         } catch (SQLException e) {
+            try {
+                pstmt.close();
+            } catch (SQLException e1) {
+                return internalServerError();
+            }
             return internalServerError();
         } finally {
             if(pstmt != null)
@@ -461,7 +466,7 @@ public class DatabaseController extends Controller {
         return ok(request);
     }
 
-    public Integer privateGetVisibility(String pid){
+    private Integer privateGetVisibility(String pid){
         if(conn == null)
             conn = connect();
 

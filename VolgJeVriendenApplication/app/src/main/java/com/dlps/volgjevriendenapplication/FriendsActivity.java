@@ -86,13 +86,6 @@ public class FriendsActivity extends AppCompatActivity {
         }.execute();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.requests_menu, menu);
-        return true;
-    }
-
     private void errorInternet() {
         runOnUiThread(new Runnable() {
             public void run() {
@@ -127,34 +120,9 @@ public class FriendsActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed();
                 return true;
-            case R.id.action_add:
-                addRequest();
-                return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void addRequest() {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-// ...Irrelevant code for customizing the buttons and title
-        LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.alert_request_editor, null);
-        dialogBuilder.setView(dialogView);
-
-        final EditText editText = (EditText) dialogView.findViewById(R.id.phonenumber);
-        editText.setHint("Enter the phonenumber");
-
-        // set dialog message
-        dialogBuilder.setCancelable(false).setPositiveButton("Send", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                System.out.println("The edit text is " + editText.getText());
-            }
-        });
-
-        // create alert dialog
-        AlertDialog alertDialog = dialogBuilder.create();
-        // show it
-        alertDialog.show();
-    }
 }

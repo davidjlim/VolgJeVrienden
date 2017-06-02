@@ -28,6 +28,10 @@ import java.security.NoSuchAlgorithmException;
  *  The app starts in a login screen.
  */
 public class MainActivity extends AppCompatActivity {
+    private static final int MIN_PASSWORD_LENGTH = 1;
+    private static final int MAX_PASSWORD_LENGTH = 20;
+    private static final int MIN_PHONENUMBER_LENGTH = 1;
+    private static final int MAX_PHONENUMBER_LENGTH = 20;
     /**
      * The task that handles the authentication
      */
@@ -81,17 +85,48 @@ public class MainActivity extends AppCompatActivity {
      * @param view the button which was pressed
      */
     public void signin(View view){
-        System.out.println("Signing in...");
+        signinup(true);
+    }
+
+    /**
+     * Starts the signup process, passes the UserLoginTask the entered pid and hashed password
+     * @param view the button which was pressed
+     */
+    public void signup(View view){
+        signinup(false);
+    }
+
+    /**
+     * Sign in or up, depending on the parametr
+     * @param signin true iff you want to signin
+     */
+    public void signinup(Boolean signin){
+
         if (mAuthTask != null) {
             return;
         }
 
         String phonenumber = mPhonenumberView.getText().toString();
-        String password = sha1(mPasswordView.getText().toString());
+        String password = mPasswordView.getText().toString();
+        if(!checkPhonenumber(phonenumber) || !checkPassword(password)) {
+            System.out.println(checkPhonenumber(phonenumber));
+            System.out.println(checkPassword(password));
+            Toast.makeText(this, R.string.invalid_data_length, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        mAuthTask = new UserLoginTask(phonenumber, password, true);
-        //mAuthTask.execute((Void) null);
+        mAuthTask = new UserLoginTask(phonenumber, sha1(password), signin);
         mAuthTask.execute();
+    }
+
+    private boolean checkPassword(String password) {
+        return (password.length() >= MIN_PASSWORD_LENGTH) &&
+                (password.length() <= MAX_PASSWORD_LENGTH);
+    }
+
+    private boolean checkPhonenumber(String phonenumber) {
+        return (phonenumber.length() >= MIN_PHONENUMBER_LENGTH) &&
+                (phonenumber.length() <= MAX_PHONENUMBER_LENGTH);
     }
 
     /**
@@ -116,23 +151,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return "";
-    }
-
-    /**
-     * Starts the signup process, passes the UserLoginTask the entered pid and hashed password
-     * @param view the button which was pressed
-     */
-    public void signup(View view){
-        if (mAuthTask != null) {
-            return;
-        }
-
-        String phonenumber = mPhonenumberView.getText().toString();
-        String password = sha1(mPasswordView.getText().toString());
-
-        mAuthTask = new UserLoginTask(phonenumber, password, false);
-        //mAuthTask.execute((Void) null);
-        mAuthTask.execute();
     }
 
     /**
