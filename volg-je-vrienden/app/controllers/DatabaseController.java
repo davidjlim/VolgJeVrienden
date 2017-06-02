@@ -288,29 +288,32 @@ public class DatabaseController extends Controller {
                 "ON U.PID = P.PID " +
                 "WHERE U.VISIBILITY = 1";
         PreparedStatement pstmt = null;
-        try {
-            pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, pid);
-            pstmt.setString(2, pid);
-            ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
-                ObjectNode request = Json.newObject();
-                request.put("pid", rs.getString("PID"));
-                request.put("image", rs.getString("IMAGE"));
-                request.put("gpsLong", rs.getObject("GPSLONG") != null ? rs.getDouble("GPSLONG") : null);
-                request.put("gpsLat", rs.getObject("GPSLAT") != null ? rs.getDouble("GPSLAT") : null);
-                result.add(request);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if(pstmt != null)
-                try {
-                    pstmt.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
+        if(privateGetVisibility(pid) == 1) {
+            try {
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, pid);
+                pstmt.setString(2, pid);
+                ResultSet rs = pstmt.executeQuery();
+                while (rs.next()) {
+                    ObjectNode request = Json.newObject();
+                    request.put("pid", rs.getString("PID"));
+                    request.put("image", rs.getString("IMAGE"));
+                    request.put("gpsLong", rs.getObject("GPSLONG") != null ? rs.getDouble("GPSLONG") : null);
+                    request.put("gpsLat", rs.getObject("GPSLAT") != null ? rs.getDouble("GPSLAT") : null);
+                    result.add(request);
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } finally {
+                if (pstmt != null)
+                    try {
+                        pstmt.close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+            }
         }
+        System.out.println("Friends: " + result);
         return ok(result);
     }
 
@@ -440,13 +443,23 @@ public class DatabaseController extends Controller {
     }
 
     public Result getVisibility(){
-        if(conn == null)
-            conn = connect();
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
         if(!checkValidUser(pid, password))
             return unauthorized();
+
+        ObjectNode request = Json.newObject();
+        Integer visibility = privateGetVisibility(pid);
+        if(visibility == null)
+            return internalServerError();
+        request.put("visibility", visibility);
+        return ok(request);
+    }
+
+    public Integer privateGetVisibility(String pid){
+        if(conn == null)
+            conn = connect();
 
         String sql = "SELECT VISIBILITY FROM USERS WHERE PID = ?";
         PreparedStatement pstmt = null;
@@ -455,10 +468,9 @@ public class DatabaseController extends Controller {
             pstmt.setString(1, pid);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-                ObjectNode request = Json.newObject();
-                request.put("visibility", rs.getInt("VISIBILITY"));
+
                 pstmt.close();
-                return ok(request);
+                return rs.getInt("VISIBILITY");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -470,7 +482,7 @@ public class DatabaseController extends Controller {
                     e.printStackTrace();
                 }
         }
-        return internalServerError();
+        return null;
     }
 
     protected Connection connect() {
