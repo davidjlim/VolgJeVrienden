@@ -259,6 +259,11 @@ public class PhotoActivity extends AppCompatActivity{
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if(imageBitmap == null) {
+            finish();
+            return;
+        }
+
         imageBitmap = getCroppedBitmap(imageBitmap);
 
         final JSONObject json = new JSONObject();
@@ -280,23 +285,6 @@ public class PhotoActivity extends AppCompatActivity{
             }
         }.execute();
         finish();
-        /*
-        System.out.println("From result: "+DataHolder.getInstance().getPhonenumber());
-        System.out.println("Hallo Wereld!");
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            if(android.os.Build.MANUFACTURER.equals("LGE")) {
-                Matrix matrix = new Matrix();
-                matrix.postRotate(90);
-                imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), matrix, true);
-                imageBitmap = makeSquare(imageBitmap);
-            }
-            finish();
-        }
-        else{
-            Toast.makeText(this, "Photo failed", Toast.LENGTH_SHORT).show();
-        }*/
     }
 
     /**

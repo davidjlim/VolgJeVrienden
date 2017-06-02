@@ -85,8 +85,12 @@ public class RequestListAdapter extends BaseAdapter implements ListAdapter {
         Button acceptBtn = (Button)view.findViewById(R.id.accept_btn);
 
         acceptBtn.setOnClickListener(new View.OnClickListener(){
+            Boolean first = true;
             @Override
             public void onClick(View v) {
+                if(!first)
+                    return;
+                first = false;
                 new AsyncTask<Void, Void, Void>() {
                     @Override
                     protected Void doInBackground(Void... params) {

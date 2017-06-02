@@ -40,5 +40,6 @@
     <string name="pref_summary_visibility">When enabled, you can follow friends and be followed.</string>
     <string name="get_visibility">getVisibility</string>
     <string name="set_visibility_url">setVisibility</string>
+    <string name="invalid_data_length">Invalid data length</string>
 
 </resources>
