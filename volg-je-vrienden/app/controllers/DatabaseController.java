@@ -3,6 +3,7 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sun.org.apache.xpath.internal.SourceTree;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import play.Configuration;
@@ -288,6 +289,9 @@ public class DatabaseController extends Controller {
                 "ON U.PID = P.PID " +
                 "WHERE U.VISIBILITY = 1";
         PreparedStatement pstmt = null;
+        System.out.println(jsonNode);
+        Integer vis = privateGetVisibility(pid);
+        System.out.println(vis);
         if(privateGetVisibility(pid) == 1) {
             try {
                 pstmt = conn.prepareStatement(sql);
@@ -468,9 +472,9 @@ public class DatabaseController extends Controller {
             pstmt.setString(1, pid);
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
-
+                Integer visibility = rs.getInt("VISIBILITY");
                 pstmt.close();
-                return rs.getInt("VISIBILITY");
+                return visibility;
             }
         } catch (SQLException e) {
             e.printStackTrace();
