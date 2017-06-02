@@ -80,8 +80,16 @@ public class PhotoActivity extends AppCompatActivity{
         super.onSaveInstanceState(outState);
     }
 
+    /**
+     * The path to the current photofile
+     */
     String mCurrentPhotoPath;
 
+    /**
+     * Creates file in which to store image
+     * @return resulting file
+     * @throws IOException
+     */
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -98,6 +106,9 @@ public class PhotoActivity extends AppCompatActivity{
         return image;
     }
 
+    /**
+     * Activates the camera screen to take a picture
+     */
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
@@ -224,6 +235,12 @@ public class PhotoActivity extends AppCompatActivity{
         }
     }
 
+    /**
+     * Rotates an image with a certain amount of degrees
+     * @param img the image to be rotated
+     * @param degree the to be rotated amount
+     * @return
+     */
     private static Bitmap rotateImage(Bitmap img, int degree) {
         Matrix matrix = new Matrix();
         matrix.postRotate(degree);
@@ -282,6 +299,11 @@ public class PhotoActivity extends AppCompatActivity{
         }*/
     }
 
+    /**
+     * Crops the image from bitmap
+     * @param bitmap the bitmap image to be cropped
+     * @return the cropped bitmap
+     */
     public Bitmap getCroppedBitmap(Bitmap bitmap) {
         Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                 bitmap.getHeight(), Bitmap.Config.ARGB_8888);

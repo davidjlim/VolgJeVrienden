@@ -25,10 +25,13 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 
 /**
- * Created by s1511432 on 01/06/17.
+ * The friends activity displays a list of all friends
  */
 
 public class FriendsActivity extends AppCompatActivity {
+    /**
+     * The JSONArray with all requests to the user
+     */
     JSONArray friends;
     /** Called when the activity is first created. */
     @Override
@@ -93,6 +96,9 @@ public class FriendsActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * When a connectionerror has occurred
+     */
     private void errorInternet() {
         runOnUiThread(new Runnable() {
             public void run() {
@@ -101,6 +107,9 @@ public class FriendsActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Draws all the entries in the list
+     */
     public void drawElements(){
         ArrayList<String> list = new ArrayList<String>();
         for(int i=0; i<friends.length(); i++){

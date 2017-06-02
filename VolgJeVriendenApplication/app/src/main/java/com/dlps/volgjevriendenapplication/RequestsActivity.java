@@ -114,7 +114,7 @@ public class RequestsActivity extends AppCompatActivity {
     }
 
     /**
-     * When a connectionerror has occurred
+     * When a connection error has occurred
      */
     private void errorInternet() {
         runOnUiThread(new Runnable() {

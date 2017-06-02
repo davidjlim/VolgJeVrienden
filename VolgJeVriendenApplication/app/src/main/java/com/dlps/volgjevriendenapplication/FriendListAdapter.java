@@ -16,13 +16,25 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 /**
+ * For correctly displaying the items in list
  * Created by s1511432 on 02/06/17.
  */
 
 public class FriendListAdapter extends BaseAdapter implements ListAdapter {
+    /**
+     * List of entries
+     */
     private ArrayList<String> list = new ArrayList<String>();
+    /**
+     * The context of the FriendsActivity
+     */
     private Context context;
 
+    /**
+     * Constructor
+     * @param list the list of friends
+     * @param context the context of the friendsactivity
+     */
     public FriendListAdapter(ArrayList<String> list, Context context) {
         this.list = list;
         this.context = context;

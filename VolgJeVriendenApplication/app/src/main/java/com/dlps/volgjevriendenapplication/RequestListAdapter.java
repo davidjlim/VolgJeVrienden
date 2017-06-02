@@ -69,13 +69,6 @@ public class RequestListAdapter extends BaseAdapter implements ListAdapter {
         return 0;
     }
 
-    /**
-     * gets the view of the list
-     * @param position
-     * @param convertView
-     * @param parent
-     * @return
-     */
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         View view = convertView;
