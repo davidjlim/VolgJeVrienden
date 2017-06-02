@@ -39,6 +39,7 @@ import static android.graphics.Bitmap.createBitmap;
 import static java.lang.Thread.sleep;
 
 /**
+ * The photoactivity
  * Created by pim on 31-5-17.
  */
 
