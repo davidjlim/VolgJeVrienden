@@ -157,10 +157,23 @@ public class DatabaseController extends Controller {
         String password = jsonNode.findPath("password").asText();
         if(!checkValidUser(pid, password))
             return unauthorized();
-
-        String sql = "INSERT INTO REQUESTS(PID1, PID2) VALUES(?, ?)";
+        if(!checkUser(pid2))
+            return badRequest();
+        String sql = "SELECT * FROM REQUESTS WHERE PID1 = ? AND PID2 = ? " +
+                "UNION SELECT * FROM REQUESTS WHERE PID1 = ? AND PID2 = ?";
+        String sql2 = "INSERT INTO REQUESTS(PID1, PID2) VALUES(?, ?)";
         PreparedStatement pstmt = null;
         try {pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, pid);
+            pstmt.setString(2, pid2);
+            pstmt.setString(3, pid2);
+            pstmt.setString(4, pid);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                pstmt.close();
+                return badRequest();
+            }
+            pstmt = conn.prepareStatement(sql2);
             pstmt.setString(1, pid);
             pstmt.setString(2, pid2);
             pstmt.executeUpdate();
