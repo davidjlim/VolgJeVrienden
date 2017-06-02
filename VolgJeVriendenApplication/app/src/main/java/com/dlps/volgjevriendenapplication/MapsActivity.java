@@ -2,11 +2,13 @@ package com.dlps.volgjevriendenapplication;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -43,6 +45,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            finish();
+            return;
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -60,6 +67,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+
+        setCurrentVisibility();
     }
 
     @Override
@@ -82,6 +91,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else if(id == R.id.action_friends) {
             Intent intent = new Intent(this, FriendsActivity.class);
             startActivity(intent);
+            return true;
+        }
+        else if(id == R.id.action_logout) {
+            finish();
+            setResult(R.id.action_logout);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -221,5 +235,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Toast toast = Toast.makeText(context, R.string.location_unknown, duration);
         toast.show();
+    }
+
+    private void setCurrentVisibility() {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                String url = getString(R.string.ip_address) + getString(R.string.get_visibility);
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("pid", DataHolder.getInstance().getPhonenumber());
+                    json.put("password", DataHolder.getInstance().getPassword());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                HttpResultMessage httpResultMessage = ServerConnector.postRequest(url, json);
+                JSONObject jsonVisibility = null;
+                try {
+                    jsonVisibility = new JSONObject(httpResultMessage.getHttpMessage());
+                    Boolean visibility = jsonVisibility.getInt("visibility") == 1;
+                    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(MapsActivity.this);
+                    SharedPreferences.Editor editor = sp.edit();
+                    editor.putBoolean("switch_visibility", visibility);
+                    editor.apply();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute();
     }
 }

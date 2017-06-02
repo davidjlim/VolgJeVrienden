@@ -4,7 +4,7 @@
     <string name="phone_number_hint">Enter your phone number</string>
     <string name="password_hint">Enter your password</string>
     <string name="error_incorrect_password">Incorrect password</string>
-    <string name="ip_address">http://192.168.178.18:9000/</string>
+    <string name="ip_address">http://145.118.85.55:9000/</string>
     <string name="signup_url">signup</string>
     <string name="title_activity_maps">Map</string>
     <string name="action_sign_up">Sign up</string>
@@ -20,7 +20,7 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
     <string name="pref_header_general">General</string>
-    <string name="pref_title_enable_following">Enable following</string>
+    <string name="pref_title_set_visibility">Set following</string>
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>
     <string name="change_photo">Change photo</string>
@@ -34,5 +34,11 @@
     <string name="get_requests_url">getRequests</string>
     <string name="add_friend_url">addFriend</string>
     <string name="request_phone_number_hint">Enter the phonenumber</string>
+    <string name="make_request_url">makeRequest</string>
+    <string name="request_sent">Request sent</string>
+    <string name="action_log_out">Log out</string>
+    <string name="pref_summary_visibility">When enabled, you can follow friends and be followed.</string>
+    <string name="get_visibility">getVisibility</string>
+    <string name="set_visibility_url">setVisibility</string>
 
 </resources>

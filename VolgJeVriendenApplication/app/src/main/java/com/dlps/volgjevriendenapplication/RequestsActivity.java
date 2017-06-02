@@ -3,6 +3,7 @@ package com.dlps.volgjevriendenapplication;
 
 import android.app.ListActivity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
@@ -35,6 +36,11 @@ public class RequestsActivity extends AppCompatActivity {
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            finish();
+            return;
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_requests);
 
@@ -150,7 +156,34 @@ public class RequestsActivity extends AppCompatActivity {
         // set dialog message
         dialogBuilder.setCancelable(false).setPositiveButton("Send", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                System.out.println("The edit text is " + editText.getText());
+                final String phonenumber2 = String.valueOf(editText.getText());
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... params) {
+                        String url = getString(R.string.ip_address) +
+                                getString(R.string.make_request_url);
+                        JSONObject json = new JSONObject();
+                        try {
+                            json.put("pid", DataHolder.getInstance().getPhonenumber());
+                            json.put("password",DataHolder.getInstance().getPassword());
+                            json.put("pid2", phonenumber2);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        System.out.println("Request: " + json);
+                        int httpResult = ServerConnector.postRequest(url,json).getHttpResult();
+                        final String toastText = (httpResult == HttpURLConnection.HTTP_OK) ?
+                                getString(R.string.request_sent)
+                                : getString(R.string.no_connection);
+                        runOnUiThread(new Runnable() {
+                                          @Override
+                                          public void run() {
+                                              Toast.makeText(RequestsActivity.this, toastText, Toast.LENGTH_SHORT).show();
+                                          }
+                        });
+                        return null;
+                    }
+                }.execute();
             }
         });
 

@@ -22,5 +22,9 @@
         android:title="@string/action_friends"
         app:showAsAction="never"/>
 
+    <item android:id="@+id/action_logout"
+        android:title="@string/action_log_out"
+        app:showAsAction="never"/>
+
 
 </menu>
