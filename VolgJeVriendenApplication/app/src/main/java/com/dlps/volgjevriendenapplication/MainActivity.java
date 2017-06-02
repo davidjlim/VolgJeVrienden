@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
             switch(HttpResult){
                 case ServerConnector.HTTP_NO_CONNECTION: text = getString(R.string.no_connection); break;
                 case HttpURLConnection.HTTP_NOT_FOUND : text = getString(R.string.user_not_found); break;
-                case HttpURLConnection.HTTP_UNAUTHORIZED : text = getString(R.string.incorrect_password); break;
+                case HttpURLConnection.HTTP_UNAUTHORIZED : text = getString(R.string.error_incorrect_password); break;
                 case HttpURLConnection.HTTP_BAD_REQUEST : text = getString(R.string.phonenumber_taken); break;
                 default: text = getString(R.string.something_went_wrong);
             }

@@ -110,7 +110,7 @@ public class RequestsActivity extends AppCompatActivity {
     }
 
     public void drawElements(){
-        ArrayList<String> list = new ArrayList<String>();
+        ArrayList<String> list = new ArrayList<>();
         for(int i=0; i<requests.length(); i++){
             try {
                 JSONObject request = requests.getJSONObject(i);
