@@ -26,12 +26,11 @@ public class FriendsController extends DatabaseController {
         if(conn == null)
             conn = connect();
         JsonNode jsonNode = Controller.request().body().asJson();
-        System.out.println(jsonNode.toString());
         String pid = jsonNode.findPath("pid").asText();
         String pid2 = jsonNode.findPath("pid2").asText();
         String password = jsonNode.findPath("password").asText();
         if(!checkValidUser(pid, password))
-            return unauthorized();
+            return unauthorized(); // check whether the user is authorised
 
         String sql = "SELECT * FROM REQUESTS WHERE PID1 = ? AND PID2 = ?";
         String sql2 = "DELETE FROM REQUESTS WHERE PID1= ? AND PID2 = ?";
@@ -41,19 +40,19 @@ public class FriendsController extends DatabaseController {
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid2);
             pstmt.setString(2, pid);
-            ResultSet rs = pstmt.executeQuery();
-            if(!rs.next()) {
+            ResultSet rs = pstmt.executeQuery(); // checks whether the request exists
+            if(!rs.next()) { // if the request doesn't exist
                 pstmt.close();
                 return badRequest();
             }
             pstmt = conn.prepareStatement(sql2);
             pstmt.setString(1, pid2);
             pstmt.setString(2, pid);
-            pstmt.executeUpdate();
+            pstmt.executeUpdate(); // remove the request from REQUESTS
             pstmt = conn.prepareStatement(sql3);
             pstmt.setString(1, pid2);
             pstmt.setString(2, pid);
-            pstmt.executeUpdate();
+            pstmt.executeUpdate(); // add the friendship to ISFRIENDSWITH
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -64,7 +63,7 @@ public class FriendsController extends DatabaseController {
                     e.printStackTrace();
                 }
         }
-        return ok("Het ging hopelijk goed! (friends)");
+        return ok();
     }
 
     /**
@@ -80,18 +79,16 @@ public class FriendsController extends DatabaseController {
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
         if(!checkValidUser(pid, password))
-            return unauthorized();
+            return unauthorized(); // checks whether the user is authorised
         ArrayNode result = Json.newArray();
         String sql = "SELECT U.PID, U.IMAGE, U.GPSLONG, U.GPSLAT " +
                 "FROM ((SELECT PID1 AS PID FROM ISFRIENDSWITH WHERE PID2 = ? " +
                 "UNION SELECT PID2 AS PID FROM ISFRIENDSWITH WHERE PID1 = ?) AS P) " +
                 "INNER JOIN USERS U " +
                 "ON U.PID = P.PID " +
-                "WHERE U.VISIBILITY = 1";
+                "WHERE U.VISIBILITY = 1"; // Finds the pids from all friends, then
+        // cross reference it with all visible users and select the desired info
         PreparedStatement pstmt = null;
-        System.out.println(jsonNode);
-        Integer vis = privateGetVisibility(pid);
-        System.out.println(vis);
         if(privateGetVisibility(pid) == 1) {
             try {
                 pstmt = conn.prepareStatement(sql);
@@ -104,7 +101,7 @@ public class FriendsController extends DatabaseController {
                     request.put("image", rs.getString("IMAGE"));
                     request.put("gpsLong", rs.getObject("GPSLONG") != null ? rs.getDouble("GPSLONG") : null);
                     request.put("gpsLat", rs.getObject("GPSLAT") != null ? rs.getDouble("GPSLAT") : null);
-                    result.add(request);
+                    result.add(request); // packs the rows into ObjectNodes and insert into ArrayNode
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -117,7 +114,6 @@ public class FriendsController extends DatabaseController {
                     }
             }
         }
-        System.out.println("Friends: " + result);
         return ok(result);
     }
 
@@ -134,7 +130,7 @@ public class FriendsController extends DatabaseController {
         String pid2 = jsonNode.findPath("pid2").asText();
         String password = jsonNode.findPath("password").asText();
         if(!checkValidUser(pid, password))
-            return unauthorized();
+            return unauthorized(); // checks whether the user is authorised
 
         String sql = "DELETE FROM ISFRIENDSWITH WHERE (PID1=? AND PID2=?) OR (PID1=? AND PID2=?)";
         PreparedStatement pstmt = null;
@@ -142,7 +138,7 @@ public class FriendsController extends DatabaseController {
             pstmt.setString(1, pid);
             pstmt.setString(2, pid2);
             pstmt.setString(3, pid2);
-            pstmt.setString(4, pid);
+            pstmt.setString(4, pid); // Being friends is bidirectional, so both orders are possible
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -154,6 +150,6 @@ public class FriendsController extends DatabaseController {
                     e.printStackTrace();
                 }
         }
-        return ok("Het ging hopelijk goed! (removeFriend)");
+        return ok();
     }
 }

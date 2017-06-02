@@ -1,7 +1,6 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -27,15 +26,13 @@ public class UsersController extends DatabaseController {
     public Result signin(){
         if(conn == null)
             conn = connect();
-        System.out.println("Signing in");
         JsonNode jsonNode = Controller.request().body().asJson();
-        System.out.println(jsonNode.toString());
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
         if(!checkUser(pid))
-            return notFound();
+            return notFound(); // the user doesn't exist
         if(!checkValidUser(pid, password))
-            return unauthorized();
+            return unauthorized(); // the password doesn't belong to this pid
         return ok();
     }
 
@@ -46,18 +43,17 @@ public class UsersController extends DatabaseController {
     public Result signup() {
         if(conn == null)
             conn = connect();
-        System.out.printf("Signing up");
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
 
         if(checkUser(pid))
-            return badRequest();
+            return badRequest(); // a user with this pid already exists
         String sql = "INSERT INTO USERS(PID, PASSWORDHASH, IMAGE) VALUES(?, ?, NULL)";
         PreparedStatement pstmt = null;
         try {pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
-            pstmt.setString(2, DigestUtils.sha1Hex(password));
+            pstmt.setString(2, DigestUtils.sha1Hex(password)); // insert hashed password into the db
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -70,7 +66,7 @@ public class UsersController extends DatabaseController {
                 }
         }
 
-        return ok("Did it work?");
+        return ok();
     }
 
     /**
@@ -87,7 +83,7 @@ public class UsersController extends DatabaseController {
         double gpsLat = jsonNode.findPath("gpsLat").asDouble();
 
         if(!checkValidUser(pid, password))
-            return unauthorized();
+            return unauthorized(); // checks whether the user is authorised
 
         String sql = "UPDATE USERS SET GPSLONG=?, GPSLAT=? WHERE PID=?";
         PreparedStatement pstmt = null;
@@ -106,7 +102,7 @@ public class UsersController extends DatabaseController {
                     e.printStackTrace();
                 }
         }
-        return ok("Het ging hopelijk goed! (gpsUpdate)");
+        return ok();
     }
 
     /**
@@ -117,14 +113,12 @@ public class UsersController extends DatabaseController {
     public Result addImage() throws SQLException {
         if(conn == null)
             conn = connect();
-        System.out.printf("Adding image...");
         JsonNode jsonNode = Controller.request().body().asJson();
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
         String image = jsonNode.findPath("image").asText();
-        System.out.println(image.length());
         if(!checkValidUser(pid, password))
-            return unauthorized();
+            return unauthorized(); // checks whether the user is authorised
 
         String sql = "UPDATE USERS SET IMAGE=? WHERE PID=?";
         PreparedStatement pstmt = null;
@@ -156,7 +150,7 @@ public class UsersController extends DatabaseController {
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
         if(!checkValidUser(pid, password))
-            return unauthorized();
+            return unauthorized(); // checks whether the user is authorised
 
         String sql = "SELECT IMAGE FROM USERS WHERE PID = ?";
         PreparedStatement pstmt = null;
@@ -168,7 +162,7 @@ public class UsersController extends DatabaseController {
                 ObjectNode request = Json.newObject();
                 request.put("image", rs.getString("IMAGE"));
                 pstmt.close();
-                return ok(request);
+                return ok(request); // returns the row in an ObjectNode
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -195,7 +189,7 @@ public class UsersController extends DatabaseController {
         String password = jsonNode.findPath("password").asText();
         Boolean visibility = jsonNode.findPath("visibility").asBoolean();
         if(!checkValidUser(pid, password))
-            return unauthorized();
+            return unauthorized(); // checks whether the user is authorised
 
         String sql = "UPDATE USERS SET VISIBILITY=? WHERE PID=?";
         PreparedStatement pstmt = null;
@@ -230,7 +224,7 @@ public class UsersController extends DatabaseController {
         String pid = jsonNode.findPath("pid").asText();
         String password = jsonNode.findPath("password").asText();
         if(!checkValidUser(pid, password))
-            return unauthorized();
+            return unauthorized(); // checks whether the user is authorised
 
         ObjectNode request = Json.newObject();
         Integer visibility = privateGetVisibility(pid);

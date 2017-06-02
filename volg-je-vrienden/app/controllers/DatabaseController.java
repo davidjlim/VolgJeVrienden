@@ -49,7 +49,7 @@ public class DatabaseController extends Controller {
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, pid);
             ResultSet rs = pstmt.executeQuery();
-            while (rs.next()) {
+            while (rs.next()) { // if the resultset is non-empty
                 Integer visibility = rs.getInt("VISIBILITY");
                 pstmt.close();
                 return visibility;
@@ -97,7 +97,7 @@ public class DatabaseController extends Controller {
             pstmt = conn.prepareStatement(select);
             pstmt.setString(1,pid);
             ResultSet rs = pstmt.executeQuery();
-            if(!rs.next()) {
+            if(!rs.next()) { // if the resultset is empty
                 pstmt.close();
                 return false;
             }
@@ -135,7 +135,7 @@ public class DatabaseController extends Controller {
             pstmt.setString(1,pid);
             pstmt.setString(2, DigestUtils.sha1Hex(password));
             ResultSet rs = pstmt.executeQuery();
-            if(!rs.next()) {
+            if(!rs.next()) { // if the resultset is empty
                 pstmt.close();
                 return false;
             }
